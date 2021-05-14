@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "AuditlogService": {
+    "CustomerEventHandler": {
       "commandName": "Project",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development"

@@ -1,17 +1,17 @@
 using System;
 using Pitstop.Infrastructure.Messaging;
 
-namespace CustomerEventHandler
+namespace Pitstop.CustomerEventHandler
 {
-    public class CustomerRegistered : Event
+    class CustomerRegistered : Event
     {
         public string name;
-        public string id;
-        public CustomerRegistered(string id, string name) : base()
+        public string CustomerId;
+
+        public CustomerRegistered(Guid messageId, string CustomerId, string name) : base(messageId)
         {
             this.name = name;
-            this.id = id;
+            this.CustomerId = CustomerId;
         }
-
     }
 }

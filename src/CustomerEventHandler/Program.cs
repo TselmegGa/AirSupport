@@ -1,11 +1,19 @@
-﻿using System.Threading.Tasks;
-using Pitstop.Infrastructure.Messaging.Configuration;
+﻿using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+// using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Pitstop.Infrastructure.Messaging;
+using Pitstop.Infrastructure.Messaging.Configuration;
+
 using Serilog;
 
+using Polly;
 
-namespace CustomerEventHandler
+namespace Pitstop.CustomerEventHandler
 {
     class Program
     {
@@ -18,17 +26,23 @@ namespace CustomerEventHandler
         private static IHostBuilder CreateHostBuilder(string[] args)
         {
             var hostBuilder = Host.CreateDefaultBuilder(args)
+                .ConfigureHostConfiguration(configHost =>
+                {
+                    configHost.SetBasePath(Directory.GetCurrentDirectory());
+                    configHost.AddJsonFile("hostsettings.json", optional: true);
+                    configHost.AddJsonFile($"appsettings.json", optional: false);
+                    configHost.AddEnvironmentVariables();
+                    configHost.AddEnvironmentVariables("DOTNET_");
+                    configHost.AddCommandLine(args);
+                })
+                .ConfigureAppConfiguration((hostContext, config) =>
+                {
+                    config.AddJsonFile($"appsettings.{hostContext.HostingEnvironment.EnvironmentName}.json", optional: false);
+                })
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.UseRabbitMQMessageHandler(hostContext.Configuration);
-
-                    services.AddTransient<CustomerManagerConfig>((svc) =>
-                    {
-                        var auditlogConfigSection = hostContext.Configuration.GetSection("CustomerEventHandler");
-                        string logPath = auditlogConfigSection["path"];
-                        return new CustomerManagerConfig { LogPath = logPath };
-                    });
-
+                    
                     services.AddHostedService<CustomerManager>();
                 })
                 .UseSerilog((hostContext, loggerConfiguration) =>
@@ -36,9 +50,8 @@ namespace CustomerEventHandler
                     loggerConfiguration.ReadFrom.Configuration(hostContext.Configuration);
                 })
                 .UseConsoleLifetime();
-                
-            return hostBuilder;
+
+                return hostBuilder;
         }
     }
-    
 }
