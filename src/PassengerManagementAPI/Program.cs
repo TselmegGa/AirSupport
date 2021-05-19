@@ -9,15 +9,17 @@ namespace AirSupport.Application.PassengerManagement
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args)
-                .Build()
+            BuildWebHost(args)
                 .Run();
         }
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost
-                .CreateDefaultBuilder(args)
+
+        private static IWebHost BuildWebHost(string[] args)
+        {
+            return WebHost.CreateDefaultBuilder(args)
                 .UseSerilog()
                 .UseHealthChecks("/hc")
-                .UseStartup<Startup>();
+                .UseStartup<Startup>()
+                .Build();
+        }
     }
 }

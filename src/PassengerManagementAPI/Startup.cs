@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -29,7 +29,7 @@ namespace AirSupport.Application.PassengerManagement
             // add DBContext
             var sqlConnectionString = _configuration.GetConnectionString("PassengerManagementCN");
             services.AddDbContext<PassengerManagementDBContext>(options => options.UseSqlServer(sqlConnectionString));
-            
+
             // add messagepublisher
             services.UseRabbitMQMessagePublisher(_configuration);
 
@@ -41,7 +41,7 @@ namespace AirSupport.Application.PassengerManagement
             // Register the Swagger generator, defining one or more Swagger documents
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "PassengerManagementCN API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "PassengerManagement API", Version = "v1" });
             });
 
             services.AddHealthChecks(checks =>

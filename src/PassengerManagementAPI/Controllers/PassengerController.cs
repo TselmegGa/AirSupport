@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using AirSupport.Application.PassengerManagement.Model;
 using AirSupport.Application.PassengerManagement.DataAccess;
@@ -57,7 +57,7 @@ namespace AirSupport.Application.PassengerManagement.Controllers
                     // }
 
                     // insert vehicle
-                    Passenger passenger = command.MapToVehicle();
+                    Passenger passenger = command.MapToPassenger();
                     _dbContext.Passengers.Add(passenger);
                     await _dbContext.SaveChangesAsync();
 

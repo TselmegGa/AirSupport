@@ -5,13 +5,10 @@ namespace AirSupport.PassengerManagementAPI.Mappers
 {
     public static class Mappers
     {
-        public static Passenger MapToVehicle(this RegisterPassenger command) => new Passenger
+        public static Passenger MapToPassenger(this RegisterPassenger command) => new Passenger
         {
-            Id = command.Id
-            // LicenseNumber = command.LicenseNumber,
-            // Brand = command.Brand,
-            // Type = command.Type,
-            // OwnerId = command.OwnerId
+            Id = command.Id,
+            CheckedIn = command.CheckedIn
         };
     }
 }
