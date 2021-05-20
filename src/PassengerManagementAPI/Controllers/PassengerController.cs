@@ -44,31 +44,28 @@ namespace AirSupport.Application.PassengerManagement.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> RegisterAsync([FromBody] RegisterPassenger command)
+        public async Task<IActionResult> RegisterAsync([FromBody] Passenger passenger)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
+                    // 
+
                     // check invariants
                     // if (!Regex.IsMatch(command.LicenseNumber, NUMBER_PATTERN, RegexOptions.IgnoreCase))
                     // {
                     //     return BadRequest($"The specified license-number '{command.LicenseNumber}' was not in the correct format.");
                     // }
 
-                    // insert vehicle
-                    Passenger passenger = command.MapToPassenger();
-                    _dbContext.Passengers.Add(passenger);
-                    await _dbContext.SaveChangesAsync();
-
                     // send event
-                    var e = PassengerRegistered.FromCommand(command);
+                    var e = PassengerRegistered.FromPassenger(passenger);
                     await _messagePublisher.PublishMessageAsync(e.MessageType, e, "");
-
+                    return Ok("Prosessing");
                     //return result
-                    return CreatedAtRoute("GetById", new { id = passenger.Id }, passenger);
+                    // return CreatedAtRoute("GetById", new { id = passenger.Id }, passenger);
                 }
-                return BadRequest();
+                return BadRequest(ModelState);
             }
             catch (DbUpdateException)
             {
@@ -78,5 +75,28 @@ namespace AirSupport.Application.PassengerManagement.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
+
+        [HttpPost]
+        [Route("Arrived", Name = "SetArrived")]
+        public async Task<IActionResult> SetArrivedAsync([FromBody] SetPassengerCheckedIn command)
+        {
+            try
+            {
+                Passenger passenger = await _dbContext.Passengers.FirstOrDefaultAsync(v => v.Id == command.Id);
+                passenger.CheckedIn = command.CheckedIn;
+                var e = PassengerArrived.FromPassenger(passenger);
+                await _messagePublisher.PublishMessageAsync(e.MessageType, e, "");
+                return Ok("Prosessing");
+
+            }
+            catch (DbUpdateException)
+            {
+                ModelState.AddModelError("", "Unable to save changes. " +
+                    "Try again, and if the problem persists " +
+                    "see your system administrator.");
+                return StatusCode(StatusCodes.Status500InternalServerError);
+            }
+        }
+
     }
 }

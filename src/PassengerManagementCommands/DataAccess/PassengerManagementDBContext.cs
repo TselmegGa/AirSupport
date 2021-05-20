@@ -1,13 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using AirSupport.Application.PassengerManagement.Model;
+using AirSupport.Application.PassengerManagementCommands.Model;
 using Polly;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace AirSupport.Application.PassengerManagement.DataAccess
+namespace AirSupport.Application.PassengerManagementCommands.DataAccess
 {
     public class PassengerManagementDBContext : DbContext
     {

@@ -1,13 +1,12 @@
-﻿using AirSupport.Application.PassengerManagement.Commands;
-using AirSupport.Application.PassengerManagement.Model;
+using AirSupport.Application.PassengerManagementCommands.Commands;
 using Pitstop.Infrastructure.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace AirSupport.Application.PassengerManagement.Events
+namespace AirSupport.Application.PassengerManagementCommands.Events
 {
-    public class PassengerRegistered : Event
+    public class RegisterPassenger : Event
     {
         public readonly String FirstName;
         public readonly String LastName;
@@ -21,7 +20,7 @@ namespace AirSupport.Application.PassengerManagement.Events
         public readonly bool CheckedIn;
         public readonly int FlightId;
 
-        public PassengerRegistered(Guid messageId, String firstName, String lastName, String email, DateTime birthDate, String phoneNumber, String cellNumber, String gender, String nationality, int flightId) : 
+        public RegisterPassenger(Guid messageId, String firstName, String lastName, String email, DateTime birthDate, String phoneNumber, String cellNumber, String gender, String nationality,bool checkedIn, int flightId) : 
             base(messageId)
         {
             FirstName = firstName;
@@ -36,18 +35,20 @@ namespace AirSupport.Application.PassengerManagement.Events
             FlightId = flightId;
         }
 
-        public static PassengerRegistered FromPassenger(Passenger passenger){
-            return new PassengerRegistered(
+        public static RegisterPassenger FromCommand(CommandRegisterPassenger command)
+        {
+            return new RegisterPassenger(
                 Guid.NewGuid(),
-                passenger.FirstName,
-                passenger.LastName,
-                passenger.Email,
-                passenger.BirthDate,
-                passenger.PhoneNumber,
-                passenger.CellNumber,
-                passenger.Gender,
-                passenger.Nationality,
-                passenger.FlightId
+                command.FirstName,
+                command.LastName,
+                command.Email,
+                command.BirthDate,
+                command.PhoneNumber,
+                command.CellNumber,
+                command.Gender,
+                command.Nationality,
+                command.CheckedIn,
+                command.FlightId
             );
         }
     }

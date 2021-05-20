@@ -4,14 +4,16 @@ using AirSupport.Application.PassengerManagement.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AirSupport.Application.PassengerManagement.Migrations
 {
     [DbContext(typeof(PassengerManagementDBContext))]
-    partial class PassengerManagementDBContextModelSnapshot : ModelSnapshot
+    [Migration("20210520102206_update20mei")]
+    partial class update20mei
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

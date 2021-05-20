@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
-using AirSupport.Application.PassengerManagement.DataAccess;
+using AirSupport.Application.PassengerManagementCommands.DataAccess;
 using Pitstop.Infrastructure.Messaging;
 using Serilog;
 using Microsoft.Extensions.HealthChecks;
@@ -12,7 +12,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Hosting;
 using Pitstop.Infrastructure.Messaging.Configuration;
 
-namespace AirSupport.Application.PassengerManagement
+namespace AirSupport.Application.PassengerManagementCommands
 {
     public class Startup
     {
@@ -28,12 +28,13 @@ namespace AirSupport.Application.PassengerManagement
         {
             // add DBContext
             var sqlConnectionString = _configuration.GetConnectionString("PassengerManagementCN");
+            Log.Information(sqlConnectionString);
             services.AddDbContext<PassengerManagementDBContext>(options => options.UseSqlServer(sqlConnectionString));
 
             // add messagepublisher
             services.UseRabbitMQMessagePublisher(_configuration);
             services.UseRabbitMQMessageHandler(_configuration);
-            services.AddHostedService<MassageHandler>();
+            services.AddHostedService<PassengerManager>();
 
             // Add framework services.
             services
@@ -41,10 +42,7 @@ namespace AirSupport.Application.PassengerManagement
                 .AddNewtonsoftJson();
 
             // Register the Swagger generator, defining one or more Swagger documents
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "PassengerManagement API", Version = "v1" });
-            });
+            
 
             services.AddHealthChecks(checks =>
             {
@@ -75,10 +73,10 @@ namespace AirSupport.Application.PassengerManagement
             });
 
             // auto migrate db
-            using (var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
-            {
-                scope.ServiceProvider.GetService<PassengerManagementDBContext>().MigrateDB();
-            }                     
+            // using (var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            // {
+            //     scope.ServiceProvider.GetService<PassengerManagementDBContext>().MigrateDB();
+            // }                     
         }
     }
 }
