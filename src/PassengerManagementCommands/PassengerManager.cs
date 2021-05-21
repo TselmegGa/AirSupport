@@ -90,7 +90,14 @@ namespace AirSupport.Application.PassengerManagementCommands
                 if (command.isValid())
                 {
                     Flight flight = command.MapToFlight();
-                    _dbContext.Flights.Add(flight);
+                    if (_dbContext.Flights.Any(e => e.Id = flight.Id))
+                    {
+                        _dbContext.Flights.Update(flight);
+                    }
+                    else
+                    {
+                        _dbContext.Flights.Add(flight);
+                    }
                     await _dbContext.SaveChangesAsync();
                 }
             }
