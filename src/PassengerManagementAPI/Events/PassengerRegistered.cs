@@ -1,5 +1,4 @@
-﻿using AirSupport.Application.PassengerManagement.Commands;
-using AirSupport.Application.PassengerManagement.Model;
+﻿using AirSupport.Application.PassengerManagement.Model;
 using Pitstop.Infrastructure.Messaging;
 using System;
 using System.Collections.Generic;

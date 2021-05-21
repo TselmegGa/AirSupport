@@ -6,13 +6,15 @@ using System.Text;
 
 namespace AirSupport.Application.PassengerManagementCommands.Commands
 {
-    public class CommandArrivalPassenger : Command
+    public class CommandPassengerCheckedIn : Command
     {
         public readonly Passenger Passenger;
-        public CommandArrivalPassenger(Guid messageId, Passenger passenger) :
+        public readonly bool CheckedIn;
+        public CommandPassengerCheckedIn(Guid messageId, Passenger passenger, bool checkedIn) :
             base(messageId)
         {
            Passenger = passenger;
+           CheckedIn = checkedIn;
         }
     }
 }

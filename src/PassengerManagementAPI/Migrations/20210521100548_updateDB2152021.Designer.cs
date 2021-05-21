@@ -4,14 +4,16 @@ using AirSupport.Application.PassengerManagement.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AirSupport.Application.PassengerManagement.Migrations
 {
     [DbContext(typeof(PassengerManagementDBContext))]
-    partial class PassengerManagementDBContextModelSnapshot : ModelSnapshot
+    [Migration("20210521100548_updateDB2152021")]
+    partial class updateDB2152021
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,14 +28,11 @@ namespace AirSupport.Application.PassengerManagement.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<DateTime?>("ArrivalDate")
+                    b.Property<DateTime>("ArrivalDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ArrivalGate")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DepartureDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Destination")
                         .IsRequired()
@@ -102,7 +101,7 @@ namespace AirSupport.Application.PassengerManagement.Migrations
             modelBuilder.Entity("AirSupport.Application.PassengerManagement.Model.Passenger", b =>
                 {
                     b.HasOne("AirSupport.Application.PassengerManagement.Model.Flight", "Flight")
-                        .WithMany("Passengers")
+                        .WithMany()
                         .HasForeignKey("FlightId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

@@ -4,14 +4,16 @@ using AirSupport.Application.PassengerManagement.DataAccess;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AirSupport.Application.PassengerManagement.Migrations
 {
     [DbContext(typeof(PassengerManagementDBContext))]
-    partial class PassengerManagementDBContextModelSnapshot : ModelSnapshot
+    [Migration("20210521101400_updateDB21520212")]
+    partial class updateDB21520212
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -31,9 +33,6 @@ namespace AirSupport.Application.PassengerManagement.Migrations
 
                     b.Property<string>("ArrivalGate")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("DepartureDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<string>("Destination")
                         .IsRequired()
@@ -102,7 +101,7 @@ namespace AirSupport.Application.PassengerManagement.Migrations
             modelBuilder.Entity("AirSupport.Application.PassengerManagement.Model.Passenger", b =>
                 {
                     b.HasOne("AirSupport.Application.PassengerManagement.Model.Flight", "Flight")
-                        .WithMany("Passengers")
+                        .WithMany()
                         .HasForeignKey("FlightId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

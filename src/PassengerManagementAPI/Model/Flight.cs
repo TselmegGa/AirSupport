@@ -19,11 +19,12 @@ namespace AirSupport.Application.PassengerManagement.Model
         
         [Required]
         public String Destination{get;set;}
-        
         [Required]
-        public String ArrivalGate{get; set;}
+        public DateTime DepartureDate{get;set;}
+        public String? ArrivalGate{get; set;}
         
-        [Required]
-        public DateTime ArrivalDate{get;set;}
+        public DateTime? ArrivalDate{get;set;}
+
+        public virtual ICollection<Passenger> Passengers { get; set; }
     }
 }

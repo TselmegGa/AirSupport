@@ -26,5 +26,11 @@ namespace AirSupport.PassengerManagementCommands.Mappers
             ArrivalGate = command.ArrivalGate,
             ArrivalDate = command.ArrivalDate
         };
+        public static Flight MapToFlight(this CommandRegisterFlight command)=> new Flight{
+            Id =command.Id,
+            Origin = command.Origin,
+            Destination = command.Destination,
+            DepartureDate = command.DepartureDate
+        };
     }
 }

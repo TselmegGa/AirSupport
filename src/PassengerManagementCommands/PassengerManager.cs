@@ -64,11 +64,15 @@ namespace AirSupport.Application.PassengerManagementCommands
                         break;
                     case "FlightAssigned":
                         Log.Information(messageType);
-                        await HandleAsync(messageObject.ToObject<CommandFlightAssigned>());
+                        await HandleAsync(messageObject.ToObject<CommandRegisterFlight>());
                         break;
-                    case "PassengerArrived":
+                    case "PassengerCheckedIn":
                         Log.Information(messageType);
-                        await HandleAsync(messageObject.ToObject<CommandArrivalPassenger>());
+                        await HandleAsync(messageObject.ToObject<CommandPassengerCheckedIn>());
+                        break;
+                    case "PlaneArrivedCommand":
+                        Log.Information(messageType);
+                        await HandleAsync(messageObject.ToObject<CommandPlaneArrived>());
                         break;
                 }
             }
@@ -79,18 +83,39 @@ namespace AirSupport.Application.PassengerManagementCommands
             }
             return true;
         }
-
+        private async Task<bool> HandleAsync(CommandRegisterFlight command)
+        {
+            try
+            {
+                if (command.isValid())
+                {
+                    Flight flight = command.MapToFlight();
+                    _dbContext.Flights.Add(flight);
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+            catch (DbUpdateException)
+            {
+                Log.Information("Unable to save changes. " +
+                    "Try again, and if the problem persists " +
+                    "see your system administrator.");
+            }
+            return true;
+        }
         private async Task<bool> HandleAsync(CommandRegisterPassenger command)
         {
             try
             {
+                if (command.isValid)
+                {
+                    Passenger passenger = command.MapToPassenger();
+                    _dbContext.Passengers.Add(passenger);
+                    await _dbContext.SaveChangesAsync();
 
-                Passenger passenger = command.MapToPassenger();
-                _dbContext.Passengers.Add(passenger);
-                await _dbContext.SaveChangesAsync();
+                    RegisterPassenger e = RegisterPassenger.FromCommand(command);
+                    await _messagePublisher.PublishMessageAsync(e.MessageType, e, "");
+                }
 
-                RegisterPassenger e = RegisterPassenger.FromCommand(command);
-                await _messagePublisher.PublishMessageAsync(e.MessageType, e, "");
 
             }
             catch (DbUpdateException)
@@ -120,11 +145,32 @@ namespace AirSupport.Application.PassengerManagementCommands
             return true;
         }
 
-        private async Task<bool> HandleAsync(CommandArrivalPassenger command)
+        private async Task<bool> HandleAsync(CommandPassengerCheckedIn command)
         {
             try
             {
-                _dbContext.Passengers.Update(command.Passenger);
+                Passenger p = command.Passenger;
+                p.CheckedIn = command.CheckedIn;
+                _dbContext.Passengers.Update(p);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                Log.Information("Unable to save changes. " +
+                    "Try again, and if the problem persists " +
+                    "see your system administrator.");
+            }
+            return true;
+        }
+
+        private async Task<bool> HandleAsync(CommandPlaneArrived command)
+        {
+            try
+            {
+                Flight flight = command.Flight;
+                flight.ArrivalDate = command.ArrivalDate;
+                flight.ArrivalGate = command.ArrivalGate;
+                _dbContext.Flights.Update(flight);
                 await _dbContext.SaveChangesAsync();
             }
             catch (DbUpdateException)

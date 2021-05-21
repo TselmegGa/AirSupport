@@ -1,4 +1,7 @@
 ﻿using System.Threading.Tasks;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using AirSupport.Application.PassengerManagement.Model;
 using AirSupport.Application.PassengerManagement.DataAccess;
@@ -6,8 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using Pitstop.Infrastructure.Messaging;
 using AirSupport.Application.PassengerManagement.Events;
-using AirSupport.Application.PassengerManagement.Commands;
-using AirSupport.PassengerManagementAPI.Mappers;
+using AirSupport.Application.PassengerManagement.Stubs;
 using System.Text.RegularExpressions;
 
 namespace AirSupport.Application.PassengerManagement.Controllers
@@ -77,14 +79,13 @@ namespace AirSupport.Application.PassengerManagement.Controllers
         }
 
         [HttpPost]
-        [Route("Arrived", Name = "SetArrived")]
-        public async Task<IActionResult> SetArrivedAsync([FromBody] SetPassengerCheckedIn command)
+        [Route("CheckedIn", Name = "CheckedIn")]
+        public async Task<IActionResult> SetCheckedInAsync([FromBody] PassengerCheckedInStub command)
         {
             try
             {
                 Passenger passenger = await _dbContext.Passengers.FirstOrDefaultAsync(v => v.Id == command.Id);
-                passenger.CheckedIn = command.CheckedIn;
-                var e = PassengerArrived.FromPassenger(passenger);
+                var e = PassengerCheckedIn.FromPassenger(passenger, command.CheckedIn);
                 await _messagePublisher.PublishMessageAsync(e.MessageType, e, "");
                 return Ok("Prosessing");
 
@@ -96,6 +97,33 @@ namespace AirSupport.Application.PassengerManagement.Controllers
                     "see your system administrator.");
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
+        }
+
+        [HttpPost]
+        [Route("Arrived", Name = "GetArrived")]
+        public async Task<IActionResult> GetArrivedAsync([FromBody] ArrivedStub stub)
+        {
+
+            List<Passenger> passengers = await _dbContext.Passengers.Where(e => e.Flight.ArrivalDate >= stub.ArrivalDate).ToListAsync();
+            if (passengers == null)
+            {
+                return NotFound();
+            }
+            return Ok(passengers);
+        }
+
+        [HttpPost]
+        [Route("CheckedInPassengers", Name = "CheckedInPassengers")]
+        public async Task<IActionResult> GetCheckedInPassengersAsync([FromBody] ArrivedStub stub)
+        {
+
+            // List<Flight> flights = await _dbContext.Flights.Where(e=> e.ArrivalDate == null).ToListAsync();
+            List<Passenger> passengers = await _dbContext.Passengers.Where(e => e.Flight.ArrivalDate == null && e.Flight.DepartureDate > stub.ArrivalDate && e.CheckedIn == true).ToListAsync();
+            if (passengers == null)
+            {
+                return NotFound();
+            }
+            return Ok(passengers);
         }
 
     }

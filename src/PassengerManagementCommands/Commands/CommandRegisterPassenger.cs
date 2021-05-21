@@ -2,7 +2,7 @@ using Pitstop.Infrastructure.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Text;
-
+using System.Text.RegularExpressions;
 namespace AirSupport.Application.PassengerManagementCommands.Commands
 {
     public class CommandRegisterPassenger : Command
@@ -18,6 +18,7 @@ namespace AirSupport.Application.PassengerManagementCommands.Commands
 
         public readonly bool CheckedIn;
         public readonly int FlightId;
+
         public CommandRegisterPassenger(Guid messageId, String firstName, String lastName, String email, DateTime birthDate, String phoneNumber, String cellNumber, String gender, String nationality, int flightId) :
             base(messageId)
         {
@@ -31,6 +32,27 @@ namespace AirSupport.Application.PassengerManagementCommands.Commands
             CheckedIn = false;
             Nationality = nationality;
             FlightId = flightId;
+        }
+
+        public bool isValid
+        {
+            get
+            {
+                bool isValid = true;
+                if (FirstName.Equals("") || LastName.Equals("") || Email.Contains("@") || PhoneNumber.Equals("") || CellNumber.Equals("") || Gender.Equals("") || Nationality.Equals(""))
+                {
+                    isValid = false;
+                }
+                else if (!CheckedIn)
+                {
+                    isValid = false;
+                }
+                else if (BirthDate < new DateTime())
+                {
+                    isValid = false;
+                }
+                return isValid;
+            }
         }
     }
 }

@@ -3,10 +3,9 @@ using Newtonsoft.Json.Linq;
 using Pitstop.Infrastructure.Messaging;
 using AirSupport.Application.PassengerManagement;
 using AirSupport.Application.PassengerManagement.DataAccess;
-using AirSupport.Application.PassengerManagement.Commands;
+using AirSupport.Application.PassengerManagement.Stubs;
 using AirSupport.Application.PassengerManagement.Events;
 using AirSupport.Application.PassengerManagement.Model;
-using AirSupport.PassengerManagementAPI.Mappers;
 using Serilog;
 using System;
 using System.Linq;
@@ -18,14 +17,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace AirSupport.Application.PassengerManagement
 {
-    public class ResultConv
-    {
-        public readonly int Id;
-        public ResultConv(int id): base()
-        {
-            Id = id;
-        }
-    }
     public class MassageHandler : IHostedService, IMessageHandlerCallback
     {
         IMessageHandler _messageHandler;
@@ -69,7 +60,11 @@ namespace AirSupport.Application.PassengerManagement
                 {
                     case "FlightAboutToDepart":
                         Log.Information(messageType);
-                        await HandleAsync(messageObject.ToObject<ResultConv>().Id);
+                        await HandleAsync(messageObject.ToObject<FlightDepartingStub>());
+                        break;
+                    case "PlaneArrived":
+                        Log.Information(messageType);
+                        await HandleAsync(messageObject.ToObject<FlightArrivedStub>());
                         break;
                 }
             }
@@ -81,19 +76,21 @@ namespace AirSupport.Application.PassengerManagement
             return true;
         }
 
-        private async Task<bool> HandleAsync(int FlightId)
+        private async Task<bool> HandleAsync(FlightDepartingStub stub)
         {
-            try
+            List<Passenger> Passengers = await _dbContext.Passengers.Where(e => e.FlightId == stub.Id && e.CheckedIn == false).ToListAsync();
+            PassengerToLate e = PassengerToLate.FromPassengerList(Passengers);
+            await _messagePublisher.PublishMessageAsync(e.MessageType, e, "");
+            return true;
+        }
+
+        private async Task<bool> HandleAsync(FlightArrivedStub stub)
+        {
+            Flight flight = await _dbContext.Flights.FirstAsync(v => v.Id == stub.Id);
+            if (flight != null)
             {
-                List<Passenger> Passengers = await _dbContext.Passengers.Where(e => e.FlightId == FlightId && e.CheckedIn == false).ToListAsync();
-                PassengerToLate e = PassengerToLate.FromPassengerList(Passengers);
+                var e = PlaneArrivedCommand.FromFlight(flight, stub.ArrivalDate, stub.ArrivalGate);
                 await _messagePublisher.PublishMessageAsync(e.MessageType, e, "");
-            }
-            catch (DbUpdateException)
-            {
-                Log.Information("Unable to save changes. " +
-                    "Try again, and if the problem persists " +
-                    "see your system administrator.");
             }
 
             return true;

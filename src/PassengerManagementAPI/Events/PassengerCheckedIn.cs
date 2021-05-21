@@ -1,4 +1,3 @@
-using AirSupport.Application.PassengerManagement.Commands;
 using AirSupport.Application.PassengerManagement.Model;
 using Pitstop.Infrastructure.Messaging;
 using System;
@@ -7,21 +6,24 @@ using System.Text;
 
 namespace AirSupport.Application.PassengerManagement.Events
 {
-    public class PassengerArrived : Event
+    public class PassengerCheckedIn : Event
     {
         public readonly Passenger Passenger;
+        public readonly bool CheckedIn;
 
-        public PassengerArrived(Guid messageId,Passenger passenger) : 
+        public PassengerCheckedIn(Guid messageId, Passenger passenger, bool checkedIn) :
             base(messageId)
         {
             Passenger = passenger;
+            CheckedIn = checkedIn;
         }
 
-        public static PassengerArrived FromPassenger(Passenger command)
+        public static PassengerCheckedIn FromPassenger(Passenger command, bool CheckedIn)
         {
-            return new PassengerArrived(
+            return new PassengerCheckedIn(
                 Guid.NewGuid(),
-                command
+                command,
+                CheckedIn
             );
         }
     }
