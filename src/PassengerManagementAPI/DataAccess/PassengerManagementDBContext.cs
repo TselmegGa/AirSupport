@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AirSupport.Application.PassengerManagement.DataAccess
 {
@@ -22,6 +23,7 @@ namespace AirSupport.Application.PassengerManagement.DataAccess
         {
             builder.Entity<Passenger>().ToTable("Passengers");
             builder.Entity<Flight>().ToTable("Flights");
+            builder.Entity<Flight>().Property(e => e.Id).ValueGeneratedNever();
             base.OnModelCreating(builder);
         }
 

@@ -15,14 +15,14 @@ namespace AirSupport.Application.PassengerManagementCommands.Commands
         public readonly String ArrivalGate;
 
         public readonly DateTime ArrivalDate;
-        public CommandFlightAssigned(Guid messageId, int id, String origin, String destination, String arrivalGate, DateTime arrivalDate) :
+        public CommandFlightAssigned(Guid messageId, int id, String origin, String destination, String arrivalGate, String arrivalDate) :
             base(messageId)
         {
             Id = id;
             Origin = origin;
             Destination = destination;
             ArrivalGate = arrivalGate;
-            ArrivalDate = arrivalDate;
+            ArrivalDate = DateTime.Parse(arrivalDate);
         }
     }
 }

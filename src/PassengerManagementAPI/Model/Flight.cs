@@ -10,8 +10,7 @@ namespace AirSupport.Application.PassengerManagement.Model
 {
     public class Flight
     {
-        [Key]
-        [Required]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public int Id { get; set; }
         
         [Required]
@@ -21,7 +20,7 @@ namespace AirSupport.Application.PassengerManagement.Model
         public String Destination{get;set;}
         [Required]
         public DateTime DepartureDate{get;set;}
-        public String? ArrivalGate{get; set;}
+        public String ArrivalGate{get; set;}
         
         public DateTime? ArrivalDate{get;set;}
 

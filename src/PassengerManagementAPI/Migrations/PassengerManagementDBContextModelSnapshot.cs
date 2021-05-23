@@ -22,9 +22,7 @@ namespace AirSupport.Application.PassengerManagement.Migrations
             modelBuilder.Entity("AirSupport.Application.PassengerManagement.Model.Flight", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
 
                     b.Property<DateTime?>("ArrivalDate")
                         .HasColumnType("datetime2");

@@ -8,6 +8,7 @@ using AirSupport.Application.PassengerManagementCommands.Events;
 using AirSupport.Application.PassengerManagementCommands.Model;
 using AirSupport.PassengerManagementCommands.Mappers;
 using Serilog;
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -51,7 +52,6 @@ namespace AirSupport.Application.PassengerManagementCommands
         }
         public async Task<bool> HandleMessageAsync(string messageType, string message)
         {
-            Log.Information(messageType);
             JObject messageObject = MessageSerializer.Deserialize(message);
             try
             {
@@ -89,15 +89,10 @@ namespace AirSupport.Application.PassengerManagementCommands
             {
                 if (command.isValid())
                 {
+                    Log.Information("command info:" + command.Id +", "+command.Origin+", "+command.Destination+", ",command.DepartureDate.ToString());
                     Flight flight = command.MapToFlight();
-                    if (_dbContext.Flights.Any(e => e.Id = flight.Id))
-                    {
-                        _dbContext.Flights.Update(flight);
-                    }
-                    else
-                    {
                         _dbContext.Flights.Add(flight);
-                    }
+                    
                     await _dbContext.SaveChangesAsync();
                 }
             }
