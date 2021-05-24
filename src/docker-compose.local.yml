@@ -17,3 +17,7 @@ services:
   workshopmanagementapi:
     ports:
       - "5200:5200"
+
+  flightmanagementapi:
+    ports:
+      - "5020:5020"
