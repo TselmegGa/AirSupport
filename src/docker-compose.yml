@@ -144,6 +144,28 @@ services:
       - DOTNET_ENVIRONMENT=Production
 
 
+  flightmanagementservice:
+    image: airsupport/flightmanagementservice:1.0
+    build: FlightManagementService
+    container_name: flightmanagementservice
+    depends_on:
+      - rabbitmq
+      - sqlserver
+    environment:
+      - DOTNET_ENVIRONMENT=Production
+    
+  flightmanagementapi:
+    image: airsupport/flightmanagementapi:1.0
+    build: FlightManagementAPI
+    container_name: flightmanagementapi
+    depends_on:
+      - rabbitmq
+      - sqlserver
+    ports:
+      - "5020:5020"
+    environment:
+      - DOTNET_ENVIRONMENT=Production
+
 volumes:
   sqlserverdata:
     external: true    

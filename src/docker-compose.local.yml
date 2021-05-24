@@ -12,4 +12,10 @@ services:
 
   passengermanagementapi:
     ports:
-      - "6000:6000"
+    - "6000:6000"
+    
+
+  flightmanagementapi:
+    ports:
+      - "5020:5020"
+
