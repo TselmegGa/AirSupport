@@ -119,7 +119,7 @@ namespace AirSupport.Application.PassengerManagementCommands
                     _dbContext.Passengers.Add(passenger);
                     await _dbContext.SaveChangesAsync();
 
-                    RegisterPassenger e = RegisterPassenger.FromCommand(command);
+                    RegisterPassenger e = RegisterPassenger.FromPassenger(passenger);
                     await _messagePublisher.PublishMessageAsync(e.MessageType, e, "");
                 // }
 

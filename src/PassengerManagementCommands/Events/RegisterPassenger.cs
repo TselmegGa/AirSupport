@@ -1,4 +1,5 @@
 using AirSupport.Application.PassengerManagementCommands.Commands;
+using AirSupport.Application.PassengerManagementCommands.Model;
 using Pitstop.Infrastructure.Messaging;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ namespace AirSupport.Application.PassengerManagementCommands.Events
 {
     public class RegisterPassenger : Event
     {
+        public readonly int Id;
         public readonly String FirstName;
         public readonly String LastName;
         public readonly String Email;
@@ -20,9 +22,10 @@ namespace AirSupport.Application.PassengerManagementCommands.Events
         public readonly bool CheckedIn;
         public readonly int FlightId;
 
-        public RegisterPassenger(Guid messageId, String firstName, String lastName, String email, DateTime birthDate, String phoneNumber, String cellNumber, String gender, String nationality,bool checkedIn, int flightId) : 
+        public RegisterPassenger(Guid messageId, int id, String firstName, String lastName, String email, DateTime birthDate, String phoneNumber, String cellNumber, String gender, String nationality,bool checkedIn, int flightId) : 
             base(messageId)
         {
+            Id = id;
             FirstName = firstName;
             LastName = lastName;
             Email = email;
@@ -35,10 +38,11 @@ namespace AirSupport.Application.PassengerManagementCommands.Events
             FlightId = flightId;
         }
 
-        public static RegisterPassenger FromCommand(CommandRegisterPassenger command)
+public static RegisterPassenger FromPassenger(Passenger command)
         {
             return new RegisterPassenger(
                 Guid.NewGuid(),
+                command.Id,
                 command.FirstName,
                 command.LastName,
                 command.Email,
