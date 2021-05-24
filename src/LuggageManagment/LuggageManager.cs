@@ -182,26 +182,28 @@ namespace Pitstop.LuggageManagment
     
       private async Task<bool> HandleAsync(RegisterPassenger e)
         {
-            Log.Information(e.passenger.Id+" - "+e.passenger.FirstName+" registerd");
+            Log.Information(e.Id+" - "+e.FirstName+" - "+e.LastName+" registerd");
 
            try
             {
                 //Adding the Passenger when a passenger is registered
                 Passenger passenger = new Passenger
                     {
-                        Id = e.passenger.Id, 
-                        FirstName = e.passenger.FirstName,
-                        LastName = e.passenger.LastName,
+                        Id = e.Id, 
+                        FirstName = e.FirstName,
+                        LastName = e.LastName
                     };
-                    Log.Information("AttempingtoAdd", e.passenger);
-                      _dbContext.Passengers.Add(passenger);
-                     Log.Information("AttempingToSave", e.passenger);
+                    Log.Information("AttempingtoAdd", e.Id);
+                    await _dbContext.Passengers.AddAsync(passenger);
+
+                     Log.Information("AttempingToSave", e.Id);
+
                      await _dbContext.SaveChangesAsync();
-                     Log.Information("Done", e.passenger);
+                     Log.Information("Done", e.Id);
             }
             catch (DbUpdateException)
             {
-                Log.Warning("Skipped adding passenger", e.passenger);
+                Log.Warning("Skipped adding passenger "+e.LastName, e.Id);
             }
             return true;
         }

@@ -6,12 +6,17 @@ namespace Pitstop.LuggageManagment.Events
 {
     class RegisterPassenger : Event
     {
-        public Passenger passenger;
+        public readonly int Id;
+        public readonly string FirstName;
+        public readonly string LastName;
 
-        public RegisterPassenger(Guid messageId, Passenger passenger) : base(messageId)
+        public RegisterPassenger(Guid messageId, int id, string firstName, string lastName) : base(messageId)
         {
             Console.WriteLine("RegisterPassenger Event");
-            this.passenger = passenger;
+            Console.WriteLine(firstName+lastName);
+            this.Id = id;
+            this.FirstName = firstName;
+            this.LastName = lastName;
         }
     }
 }
