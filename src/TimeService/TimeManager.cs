@@ -11,6 +11,8 @@ namespace Pitstop.TimeService
     public class TimeManager : IHostedService
     {
         DateTime _lastCheck;
+        DateTime _lastCheckHour;
+        DateTime _lastCheckQuarter;
         CancellationTokenSource _cancellationTokenSource;
         Task _task;
         IMessagePublisher _messagePublisher;
@@ -19,6 +21,8 @@ namespace Pitstop.TimeService
         {
             _cancellationTokenSource = new CancellationTokenSource();
             _lastCheck = DateTime.Now;
+            _lastCheckHour = DateTime.Now;
+            _lastCheckQuarter = DateTime.Now;
             _messagePublisher = messagePublisher;
         }
 
@@ -38,12 +42,26 @@ namespace Pitstop.TimeService
         {
             while (true)
             {
+                Log.Information("started");
                 if (DateTime.Now.Subtract(_lastCheck).Days > 0)
                 {
                     Log.Information($"Day has passed!");
                     _lastCheck = DateTime.Now;
-                    DateTime passedDay = _lastCheck.AddDays(-1);
                     DayHasPassed e = new DayHasPassed(Guid.NewGuid());
+                    await _messagePublisher.PublishMessageAsync(e.MessageType, e, "");
+                }
+                if (DateTime.Now.Subtract(_lastCheckHour).Hours > 0)
+	            {
+                    Log.Information($"Hour has passed!");
+                    _lastCheckHour = DateTime.Now;
+                    HourHasPassed e = new HourHasPassed(Guid.NewGuid());
+                    await _messagePublisher.PublishMessageAsync(e.MessageType, e, "");
+	            }
+                if (DateTime.Now.Subtract(_lastCheckQuarter).Minutes >= 15)
+                {
+                    Log.Information($"15 minutes has passed!");
+                    _lastCheckQuarter = DateTime.Now;
+                    _15MinutesHasPassed e = new _15MinutesHasPassed(Guid.NewGuid());
                     await _messagePublisher.PublishMessageAsync(e.MessageType, e, "");
                 }
                 Thread.Sleep(10000);

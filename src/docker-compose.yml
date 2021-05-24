@@ -24,7 +24,7 @@ services:
       - ACCEPT_EULA=Y 
       - MSSQL_PID=Developer
       - SA_PASSWORD=8jkGh47hnDw89Haq8LN2
-
+      
   mailserver:
     image: maildev/maildev
     container_name: mailserver
@@ -62,6 +62,17 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
 
+  rentalmanagementapi:
+      image: pitstop/rentalmanagementapi:1.0
+      build: RentalManagementAPI
+      depends_on:
+        - rabbitmq
+        - sqlserver
+      ports:
+        - "5300:5300"
+      environment:
+        - ASPNETCORE_ENVIRONMENT=Production
+
   workshopmanagementapi:
     image: pitstop/workshopmanagementapi:1.0
     build: WorkshopManagementAPI
@@ -73,6 +84,28 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
 
+  passengermanagementapi:
+    image: airsupport/passengermanagementapi:1.0
+    build: PassengerManagementAPI
+    depends_on:
+      - rabbitmq
+      - sqlserver
+    ports:
+      - "6000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+
+  passengermanagementcommands:
+    
+    image: airsupport/passengermanagementcommands:1.0
+    build: PassengerManagementCommands
+    depends_on:
+      - rabbitmq
+      - sqlserver
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      
+
   auditlogservice:
     image: pitstop/auditlogservice:1.0
     build: AuditlogService
@@ -81,6 +114,17 @@ services:
       - rabbitmq
     environment:
       - DOTNET_ENVIRONMENT=Production
+
+  invoicemanagementapi:
+    image: pitstop/invoicemanagementapi:1.0
+    build: InvoiceManagementAPI
+    depends_on:
+      - rabbitmq
+      - sqlserver
+    ports:
+      - "5100"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
 
   invoiceservice:
     image: pitstop/invoiceservice:1.0
@@ -127,6 +171,24 @@ services:
     image: pitstop/customereventhandler:1.0
     build: CustomerEventHandler
     container_name: customereventhandler
+    depends_on:
+      - rabbitmq
+    environment:
+      - DOTNET_ENVIRONMENT=Production
+      
+  rentalmanagement:
+    image: pitstop/rentalmanagement:1.0
+    build: RentalManagement
+    container_name: rentalmanagement
+    depends_on:
+      - rabbitmq
+    environment:
+      - DOTNET_ENVIRONMENT=Production
+
+  luggagemanagment:
+    image: pitstop/luggagemanagment:1.0
+    build: LuggageManagment
+    container_name: luggagemanagment
     depends_on:
       - rabbitmq
     environment:

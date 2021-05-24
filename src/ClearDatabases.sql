@@ -15,3 +15,6 @@ delete from WorkshopManagement.dbo.Customer;
 
 delete from WorkshopManagementEventStore.dbo.WorkshopPlanningEvent;
 delete from WorkshopManagementEventStore.dbo.WorkshopPlanning;
+
+delete from PassengerManagement.dbo.FLights;
+delete from PassengerManagement.dbo.Passengers;
