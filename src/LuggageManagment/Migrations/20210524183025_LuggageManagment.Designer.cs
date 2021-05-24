@@ -10,7 +10,7 @@ using Pitstop.LuggageManagment.DataAccess;
 namespace Pitstop.LuggageManagment.Migrations
 {
     [DbContext(typeof(LuggageManagmentDBContext))]
-    [Migration("20210524173949_LuggageManagment")]
+    [Migration("20210524183025_LuggageManagment")]
     partial class LuggageManagment
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

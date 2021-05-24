@@ -175,14 +175,14 @@ namespace Pitstop.LuggageManagment
             }
             catch (DbUpdateException)
             {
-                Log.Warning("Skipped adding Luggage", e.passenger.Luggage.Count);
+                Log.Warning("Skipped adding Luggage");
             }
             return true;
         }
     
       private async Task<bool> HandleAsync(RegisterPassenger e)
         {
-            Log.Information(e.passenger.FirstName+" registerd");
+            Log.Information(e.passenger.Id+" - "+e.passenger.FirstName+" registerd");
 
            try
             {
@@ -193,13 +193,15 @@ namespace Pitstop.LuggageManagment
                         FirstName = e.passenger.FirstName,
                         LastName = e.passenger.LastName,
                     };
-                     await _dbContext.Passengers.AddAsync(passenger);
+                    Log.Information("AttempingtoAdd", e.passenger);
+                      _dbContext.Passengers.Add(passenger);
+                     Log.Information("AttempingToSave", e.passenger);
                      await _dbContext.SaveChangesAsync();
-              
+                     Log.Information("Done", e.passenger);
             }
             catch (DbUpdateException)
             {
-                Log.Warning("Skipped adding Luggage", e.passenger.Luggage.Count);
+                Log.Warning("Skipped adding passenger", e.passenger);
             }
             return true;
         }
