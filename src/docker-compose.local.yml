@@ -5,19 +5,17 @@
 # (this will cause port collisions).
 version: '3'
 services:
-
-  vehiclemanagementapi:
+  
+  rentalmanagementapi:
     ports:
-      - "5000:5000"
+      - "5300:5300"
 
-  customermanagementapi:
+  passengermanagementapi:
     ports:
-      - "5100:5100"
-
-  workshopmanagementapi:
-    ports:
-      - "5200:5200"
+    - "6000:6000"
+    
 
   flightmanagementapi:
     ports:
       - "5020:5020"
+

@@ -32,6 +32,8 @@ namespace AirSupport.Application.PassengerManagement
 
             // add messagepublisher
             services.UseRabbitMQMessagePublisher(_configuration);
+            services.UseRabbitMQMessageHandler(_configuration);
+            services.AddHostedService<MassageHandler>();
 
             // Add framework services.
             services

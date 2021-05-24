@@ -2,9 +2,9 @@
 using Newtonsoft.Json.Linq;
 using Pitstop.Infrastructure.Messaging;
 using Pitstop.InvoiceService.CommunicationChannels;
+using Pitstop.InvoiceService.DataAccess;
 using Pitstop.InvoiceService.Events;
 using Pitstop.InvoiceService.Model;
-using Pitstop.InvoiceService.Repositories;
 using Serilog;
 using System;
 using System.Linq;
@@ -18,16 +18,17 @@ namespace Pitstop.InvoiceService
 {
     public class InvoiceManager : IHostedService, IMessageHandlerCallback
     {
-        private const decimal HOURLY_RATE = 18.50M;
         private IMessageHandler _messageHandler;
-        private IInvoiceRepository _repo;
         private IEmailCommunicator _emailCommunicator;
+        private InvoiceManagementDBContext _dbContext;
+        private InvoiceEventStoreDBContext _dbContextEventStore;
 
-        public InvoiceManager(IMessageHandler messageHandler, IInvoiceRepository repo, IEmailCommunicator emailCommunicator)
+        public InvoiceManager(IMessageHandler messageHandler, IEmailCommunicator emailCommunicator, InvoiceManagementDBContext dbContext, InvoiceEventStoreDBContext dbContextEventStore)
         {
             _messageHandler = messageHandler;
-            _repo = repo;
             _emailCommunicator = emailCommunicator;
+            _dbContext = dbContext;
+            _dbContextEventStore = dbContextEventStore;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -46,108 +47,135 @@ namespace Pitstop.InvoiceService
         {
             try
             {
-                JObject messageObject = MessageSerializer.Deserialize(message);
+                JObject messageObject = new JObject();
+                if (message != null || message != "")
+                {
+                    messageObject = MessageSerializer.Deserialize(message);
+                }
+                
                 switch (messageType)
                 {
-                    case "CustomerRegistered":
-                        await HandleAsync(messageObject.ToObject<CustomerRegistered>());
-                        break;
-                    case "MaintenanceJobPlanned":
-                        await HandleAsync(messageObject.ToObject<MaintenanceJobPlanned>());
-                        break;
-                    case "MaintenanceJobFinished":
-                        await HandleAsync(messageObject.ToObject<MaintenanceJobFinished>());
-                        break;
                     case "DayHasPassed":
-                        await HandleAsync(messageObject.ToObject<DayHasPassed>());
+                        await HandleAsync();
+                        break;
+                    case "RentalRegistered":
+                        await HandleAsync(messageObject.ToObject<RentalRegistered>());
+                        break;
+                    default:
                         break;
                 }
             }
             catch (Exception ex)
             {
-                Log.Error(ex, $"Error while handling {messageType} event.");
+                Log.Error(ex.Message);
             }
 
             return true;
         }
 
-        private async Task HandleAsync(CustomerRegistered cr)
+        private async Task HandleAsync(RentalRegistered rentalRegistered)
         {
-            Log.Information("Register customer: {Id}, {Name}, {Address}, {PostalCode}, {City}", 
-                cr.CustomerId, cr.Name, cr.Address, cr.PostalCode, cr.City);
-
-            Customer customer = new Customer
+            if ((rentalRegistered.Id != null || rentalRegistered.Id != "") && (rentalRegistered.Name != null || rentalRegistered.Name != ""))
             {
-                CustomerId = cr.CustomerId,
-                Name = cr.Name,
-                Address = cr.Address,
-                PostalCode = cr.PostalCode,
-                City = cr.City
-            };
+                Renter renterToInsert = new Renter();
+                renterToInsert.RenterId = rentalRegistered.Id;
+                renterToInsert.Name = rentalRegistered.Name;
+                renterToInsert.Address = "Evert van de Beekstraat 202";
+                renterToInsert.PostalCode = "1118 CP";
+                renterToInsert.City = "Amsterdam";
+                renterToInsert.Email = rentalRegistered.Name + "@gmail.com";
+                renterToInsert.RentStarted = DateTime.Now;
 
-            await _repo.RegisterCustomerAsync(customer);
-        }
-
-        private async Task HandleAsync(MaintenanceJobPlanned mjp)
-        {
-            Log.Information("Register Maintenance Job: {Id}, {Description}, {CustomerId}, {VehicleLicenseNumber}", 
-                mjp.JobId, mjp.Description, mjp.CustomerInfo.Id, mjp.VehicleInfo.LicenseNumber);
-
-            MaintenanceJob job = new MaintenanceJob
-            {
-                JobId = mjp.JobId.ToString(),
-                CustomerId = mjp.CustomerInfo.Id,
-                LicenseNumber = mjp.VehicleInfo.LicenseNumber,
-                Description = mjp.Description
-            };
-
-            await _repo.RegisterMaintenanceJobAsync(job);
-        }
-
-        private async Task HandleAsync(MaintenanceJobFinished mjf)
-        {
-            Log.Information("Finish Maintenance Job: {Id}, {StartTime}, {EndTime}", 
-                mjf.JobId, mjf.StartTime, mjf.EndTime);
-
-            await _repo.MarkMaintenanceJobAsFinished(mjf.JobId, mjf.StartTime, mjf.EndTime);
-        }
-
-        private async Task HandleAsync(DayHasPassed dhp)
-        {
-            var jobs = await _repo.GetMaintenanceJobsToBeInvoicedAsync();
-            foreach (var jobsPerCustomer in jobs.GroupBy(job => job.CustomerId))
-            {
-                DateTime invoiceDate = DateTime.Now;
-                string customerId = jobsPerCustomer.Key;
-                Customer customer = await _repo.GetCustomerAsync(customerId);
-                Invoice invoice = new Invoice
-                {
-                    InvoiceId = $"{invoiceDate.ToString("yyyyMMddhhmmss")}-{customerId.Substring(0, 4)}",
-                    InvoiceDate = invoiceDate.Date,
-                    CustomerId = customer.CustomerId,
-                    JobIds = string.Join('|', jobsPerCustomer.Select(j => j.JobId))
-                };
-
-                StringBuilder specification = new StringBuilder();
-                decimal totalAmount = 0;
-                foreach (var job in jobsPerCustomer)
-                {
-                    TimeSpan duration = job.EndTime.Value.Subtract(job.StartTime.Value);
-                    decimal amount = Math.Round((decimal)duration.TotalHours * HOURLY_RATE, 2);
-                    totalAmount += amount;
-                    specification.AppendLine($"{job.EndTime.Value.ToString("dd-MM-yyyy")} : {job.Description} on vehicle with license {job.LicenseNumber} - Duration: {duration.TotalHours} hour - Amount: &euro; {amount}");
-                }
-                invoice.Specification = specification.ToString();
-                invoice.Amount = totalAmount;
-
-                await SendInvoice(customer, invoice);
-                await _repo.RegisterInvoiceAsync(invoice);
-
-                Log.Information("Invoice {Id} sent to {Customer}", invoice.InvoiceId, customer.Name);
+                await InsertRenter(renterToInsert);
+                await InsertRentalRegisteredInEventStore(rentalRegistered);
             }
         }
 
-        private async Task SendInvoice(Customer customer, Invoice invoice)
+        private async Task InsertRentalRegisteredInEventStore(RentalRegistered rentalRegistered)
+        {
+            EventStore eventStore = new EventStore();
+            eventStore.Event = "RentalRegistered";
+            Log.Information(rentalRegistered.ToString());
+            eventStore.EventBody = "Id: " + rentalRegistered.Id + ", Name: " + rentalRegistered.Name;
+            eventStore.EventDate = DateTime.Now;
+            await _dbContextEventStore.Events.AddAsync(eventStore);
+            await _dbContextEventStore.SaveChangesAsync();
+        }
+
+        private async Task InsertDayHasPassedInEventStore()
+        {
+            EventStore eventStore = new EventStore();
+            eventStore.Event = "DayHasPassed";
+            eventStore.EventDate = DateTime.Now;
+            await _dbContextEventStore.Events.AddAsync(eventStore);
+            await _dbContextEventStore.SaveChangesAsync();
+        }
+
+        private async Task HandleAsync()
+        {
+            // ophalen renters en hierdoorheen lopen
+            // ophalen invoices per renter bestaat er geen dan kijken of de datum van nu 1 maand later is dan aangemelde datum
+            // anders de laatste invoice pakken en hier kijken of de datum van nu 1 maand later is dan laatse verstuurde datum
+
+            await InsertDayHasPassedInEventStore();
+            var renters = _dbContext.Renters.ToList();
+            foreach (var renter in renters)
+            {
+                var invoices = _dbContext.Invoices.Where(x => x.RenterId.Equals(renter.RenterId)).ToList();
+                var dateFrom = DateTime.Now.AddDays(-1);
+                var dateTo = DateTime.Now;
+                if (invoices.Count() >= 1)
+                {
+                    if (invoices.Last().InvoiceDate.AddMonths(1) >= dateFrom && invoices.Last().InvoiceDate.AddMonths(1) <= dateTo)
+                    {
+                        var invoice = CreateInvoice(renter);
+                        await SendInvoice(renter, invoice);
+                        await InsertInvoice(invoice);
+                    }
+                }
+                else
+                {
+                    if (renter.RentStarted.AddMonths(1) >= dateFrom && renter.RentStarted <= dateTo)
+                    {
+                        var invoice = CreateInvoice(renter);
+                        await SendInvoice(renter, invoice);
+                        await InsertInvoice(invoice);
+                    }
+                }
+            }
+        }
+
+        private async Task InsertInvoice(Invoice invoice)
+        {
+            if (invoice != null)
+            {
+                await _dbContext.Invoices.AddAsync(invoice);
+                await _dbContext.SaveChangesAsync();
+            }
+        }
+
+        private async Task InsertRenter(Renter renter)
+        {
+            if (renter != null)
+            {
+                await _dbContext.Renters.AddAsync(renter);
+                await _dbContext.SaveChangesAsync();
+            }
+        }
+        private Invoice CreateInvoice(Renter renter) {
+            DateTime invoiceDate = DateTime.Now;
+            Invoice invoice = new Invoice
+            {
+                InvoiceId = $"{invoiceDate.ToString("yyyyMMddhhmmss")}-{renter.RenterId}",
+                InvoiceDate = invoiceDate.Date,
+                RenterId = renter.RenterId
+            };
+
+            invoice.Amount = 1000;
+            return invoice;
+        }
+
+        private async Task SendInvoice(Renter renter, Invoice invoice)
         {
             StringBuilder body = new StringBuilder();
 
@@ -156,7 +184,7 @@ namespace Pitstop.InvoiceService
             body.AppendLine("<image src='cid:banner.jpg'>");
 
             body.AppendLine("<table style='width: 100%; border: 0px; font-size: 25pt;'><tr>");
-            body.AppendLine("<td>PITSTOP GARAGE</td>");
+            body.AppendLine("<td>Airsupport invoicing Department</td>");
             body.AppendLine("<td style='text-align: right;'>INVOICE</td>");
             body.AppendLine("</tr></table>");
 
@@ -184,10 +212,10 @@ namespace Pitstop.InvoiceService
             body.AppendLine("</td>");
 
             body.AppendLine("<td valign='top'>");
-            body.AppendLine($"{customer.Name}<br/>");
-            body.AppendLine($"{customer.Address}<br/>");
-            body.AppendLine($"{customer.PostalCode}<br/>");
-            body.AppendLine($"{customer.City}<br/>");
+            body.AppendLine($"{renter.Name}<br/>");
+            body.AppendLine($"{renter.Address}<br/>");
+            body.AppendLine($"{renter.PostalCode}<br/>");
+            body.AppendLine($"{renter.City}<br/>");
             body.AppendLine("</td>");
 
             body.AppendLine("</tr></table>");
@@ -195,19 +223,8 @@ namespace Pitstop.InvoiceService
             body.AppendLine("<hr><br/>");
 
             // body
-            body.AppendLine($"Dear {customer.Name},<br/><br/>");
-            body.AppendLine("Hereby we send you an invoice for maintenance we executed on your vehicle(s):<br/>");
-
-            body.AppendLine("<ol>");
-            foreach (string specificationLine in invoice.Specification.Split('\n'))
-            {
-                if (specificationLine.Length > 0)
-                {
-                    body.AppendLine($"<li>{specificationLine}</li>");
-                }
-            }
-            body.AppendLine("</ol>");
-
+            body.AppendLine($"Dear {renter.Name},<br/><br/>");
+            body.AppendLine("Hereby we send you an invoice for the rent of last month:<br/>");
 
             body.AppendLine($"Total amount : &euro; {invoice.Amount}<br/><br/>");
 
@@ -227,7 +244,7 @@ namespace Pitstop.InvoiceService
 
             body.AppendLine("<td valign='top'>");
             body.AppendLine(": ING<br/>");
-            body.AppendLine(": Pitstop Garage<br/>");
+            body.AppendLine(": Airsupport invoicing<br/>");
             body.AppendLine(": NL20INGB0001234567<br/>");
             body.AppendLine($": {invoice.InvoiceId}<br/>");
             body.AppendLine("</td>");
@@ -236,16 +253,16 @@ namespace Pitstop.InvoiceService
 
             // greetings
             body.AppendLine("Greetings,<br/><br/>");
-            body.AppendLine("The PitStop crew<br/>");
+            body.AppendLine("The Airsupport invoicing crew<br/>");
 
             body.AppendLine("</htm></body>");
 
             MailMessage mailMessage = new MailMessage
             {
-                From = new MailAddress("invoicing@pitstop.nl"),
-                Subject = $"Pitstop Garage Invoice #{invoice.InvoiceId}"
+                From = new MailAddress("invoicing@airsupport.com"),
+                Subject = $"Airsupport invoicing Invoice #{invoice.InvoiceId}"
             };
-            mailMessage.To.Add("pitstop@prestoprint.nl");
+            mailMessage.To.Add("airsupport@prestoprint.nl");
 
             mailMessage.Body = body.ToString();
             mailMessage.IsBodyHtml = true;
