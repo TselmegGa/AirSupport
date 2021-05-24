@@ -24,6 +24,5 @@ namespace AirSupport.Application.PassengerManagement.Model
         
         public DateTime? ArrivalDate{get;set;}
 
-        public virtual ICollection<Passenger> Passengers { get; set; }
     }
 }

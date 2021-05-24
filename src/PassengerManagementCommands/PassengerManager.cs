@@ -55,7 +55,7 @@ namespace AirSupport.Application.PassengerManagementCommands
             JObject messageObject = MessageSerializer.Deserialize(message);
             try
             {
-
+                Log.Information(messageType);
                 switch (messageType)
                 {
                     case "PassengerRegistered":
@@ -67,7 +67,7 @@ namespace AirSupport.Application.PassengerManagementCommands
                         await HandleAsync(messageObject.ToObject<CommandRegisterFlight>());
                         break;
                     case "PassengerCheckedIn":
-                        Log.Information(messageType);
+                        Log.Information(messageType +" and" + messageObject);
                         await HandleAsync(messageObject.ToObject<CommandPassengerCheckedIn>());
                         break;
                     case "PlaneArrivedCommand":
@@ -92,7 +92,7 @@ namespace AirSupport.Application.PassengerManagementCommands
                     Log.Information("command info:" + command.Id +", "+command.Origin+", "+command.Destination+", ",command.DepartureDate.ToString());
                     Flight flight = command.MapToFlight();
                     // check to make sure that entities failed transactions still kan be set
-                    if(_dbContext.Flights.Local.Any(e=> e.Id == flight.id)){
+                    if(_dbContext.Flights.Local.Any(e=> e.Id == flight.Id)){
                         _dbContext.Flights.Update(flight);
                     } else{
                         _dbContext.Flights.Add(flight);
@@ -113,15 +113,15 @@ namespace AirSupport.Application.PassengerManagementCommands
         {
             try
             {
-                if (command.isValid)
-                {
+                // if (command.isValid)
+                // {
                     Passenger passenger = command.MapToPassenger();
                     _dbContext.Passengers.Add(passenger);
                     await _dbContext.SaveChangesAsync();
 
                     RegisterPassenger e = RegisterPassenger.FromCommand(command);
                     await _messagePublisher.PublishMessageAsync(e.MessageType, e, "");
-                }
+                // }
 
 
             }

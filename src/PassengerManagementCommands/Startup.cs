@@ -39,7 +39,7 @@ namespace AirSupport.Application.PassengerManagementCommands
             // Add framework services.
             services
                 .AddMvc(options => options.EnableEndpointRouting = false)
-                .AddNewtonsoftJson();
+                .AddNewtonsoftJson(x=> x.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
             // Register the Swagger generator, defining one or more Swagger documents
             
