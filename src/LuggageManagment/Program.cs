@@ -54,7 +54,6 @@ namespace Pitstop.LuggageManagment
                             .Options;
                         var dbContext = new LuggageManagmentDBContext(dbContextOptions);
 
-                        DBInitializer.Initialize(dbContext);
 
                         return dbContext;
                     });

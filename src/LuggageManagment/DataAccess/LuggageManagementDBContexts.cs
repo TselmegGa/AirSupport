@@ -1,14 +1,19 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Pitstop.LuggageManagment.Model;
+using System.ComponentModel.DataAnnotations.Schema;
+using Polly;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Pitstop.LuggageManagment.DataAccess
 {
     public class LuggageManagmentDBContext : DbContext
     {
-     //   public LuggageManagmentDBContext()
-       // { }
-
-        public LuggageManagmentDBContext(DbContextOptions<LuggageManagmentDBContext> options) : base(options)
+                public LuggageManagmentDBContext(DbContextOptions<LuggageManagmentDBContext> options) : base(options)
         { }
 
         public DbSet<Passenger> Passengers { get; set; }
@@ -25,6 +30,13 @@ namespace Pitstop.LuggageManagment.DataAccess
 
             base.OnModelCreating(builder);
         }
+    
+        public void MigrateDB()
+        {
+            Policy
+                .Handle<Exception>()
+                .WaitAndRetry(10, r => TimeSpan.FromSeconds(10))
+                .Execute(() => Database.Migrate());
+        }
     }
 }
-

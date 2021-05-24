@@ -152,8 +152,8 @@ namespace Pitstop.LuggageManagment
                 }
 
                 //When passanger exist we add the Luggage to the existing passenger
-               // passenger.Luggage = luggageList;
-               // await _dbContext.Passengers(passenger);
+                //passenger.Luggage = luggageList;
+                //await _dbContext.Update(passenger);
             
                 await _dbContext.SaveChangesAsync();
             }
