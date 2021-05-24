@@ -9,6 +9,6 @@ namespace Pitstop.LuggageManagment.Model
         public string FirstName { get; set; }
         public string LastName { get; set; }
 
-        public List<Luggage> Luggage {get;set;}
+        public virtual List<Luggage> Luggage {get;set;}
     }
 }

@@ -20,17 +20,24 @@ namespace Pitstop.LuggageManagment.Migrations
 
             modelBuilder.Entity("Pitstop.LuggageManagment.Model.Luggage", b =>
                 {
-                    b.Property<string>("LuggageId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("LuggageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
 
                     b.Property<string>("Brand")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PassengerId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Weight")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Weight")
+                        .HasColumnType("int");
 
                     b.HasKey("LuggageId");
 

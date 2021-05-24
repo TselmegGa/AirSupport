@@ -23,9 +23,11 @@ namespace Pitstop.LuggageManagment.Migrations
                 name: "Luggage",
                 columns: table => new
                 {
-                    LuggageId = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Weight = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Brand = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LuggageId = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Weight = table.Column<int>(type: "int", nullable: false),
+                    Brand = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Color = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     PassengerId = table.Column<string>(type: "nvarchar(450)", nullable: true)
                 },
                 constraints: table =>

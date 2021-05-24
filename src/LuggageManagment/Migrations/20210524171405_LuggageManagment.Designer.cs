@@ -9,7 +9,7 @@ using Pitstop.LuggageManagment.DataAccess;
 namespace Pitstop.LuggageManagment.Migrations
 {
     [DbContext(typeof(LuggageManagmentDBContext))]
-    [Migration("20210524143052_LuggageManagment")]
+    [Migration("20210524171405_LuggageManagment")]
     partial class LuggageManagment
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -22,17 +22,24 @@ namespace Pitstop.LuggageManagment.Migrations
 
             modelBuilder.Entity("Pitstop.LuggageManagment.Model.Luggage", b =>
                 {
-                    b.Property<string>("LuggageId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("LuggageId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .UseIdentityColumn();
 
                     b.Property<string>("Brand")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PassengerId")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("Weight")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Weight")
+                        .HasColumnType("int");
 
                     b.HasKey("LuggageId");
 

@@ -127,36 +127,43 @@ namespace Pitstop.LuggageManagment
             {
                 List<Luggage> luggageList = new List<Luggage>();
                 //Adding the Luggage
-                    foreach(Luggage luggageFromEvent in e.passenger.Luggage){
-                        Luggage luggage = new Luggage{
-                            LuggageId = luggageFromEvent.LuggageId,
-                            Brand = luggageFromEvent.Brand,
-                            Weight = luggageFromEvent.Weight
-                        };
-                        luggageList.Add(luggage);
-                    }
+                    
 
-                // determine passanger
+                // Check if passenger exists in Local DB
                 Passenger passenger = await _dbContext.Passengers.FirstOrDefaultAsync(c => c.Id == e.passenger.Id);
                 if (passenger == null)
                 {
-                    //If Passanger isn't known we create a new one
+                    //If Passanger isn't known we create a new passenger
                     passenger = new Passenger
                     {
                         Id = e.passenger.Id,
                         FirstName = e.passenger.FirstName,
                         LastName = e.passenger.LastName,
-                        Luggage = luggageList
                     };
-                    //Because it's null we add it to the DB
+                    foreach(Luggage luggageFromEvent in e.passenger.Luggage){
+                        Luggage luggage = new Luggage{
+                            Brand = luggageFromEvent.Brand,
+                            Weight = luggageFromEvent.Weight,
+                            Color = luggageFromEvent.Color
+                        };
+                        luggageList.Add(luggage);
+                    }
+                    passenger.Luggage = luggageList;
                      await _dbContext.Passengers.AddAsync(passenger);
+                     await _dbContext.SaveChangesAsync();
+                }else{
+
+                Log.Information("Existing Passenger: "+ passenger.FirstName);
+                //When passanger exist we add the Luggage to the existing passenger
+                Log.Information("Amount of luggage allready present: "+ passenger.Luggage.Count);
+                foreach(Luggage luggageFromEvent in e.passenger.Luggage){
+                    passenger.Luggage.Add(luggageFromEvent);
+                }
+                _dbContext.Passengers.Update(passenger);
+                await _dbContext.SaveChangesAsync();
                 }
 
-                //When passanger exist we add the Luggage to the existing passenger
-                //passenger.Luggage = luggageList;
-                //await _dbContext.Update(passenger);
-            
-                await _dbContext.SaveChangesAsync();
+                
             }
             catch (DbUpdateException)
             {
