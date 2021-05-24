@@ -18,6 +18,11 @@ services:
     ports:
       - "5200:5200"
       
+
+  rentalmanagementapi:
+    ports:
+      - "5300:5300"
+
   passengermanagementapi:
     ports:
       - "6000:6000"
