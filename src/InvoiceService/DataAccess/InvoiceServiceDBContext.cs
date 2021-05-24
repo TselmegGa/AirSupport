@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Pitstop.InvoiceService.Model;
-using System;
 
 namespace Pitstop.InvoiceService.DataAccess
 {
@@ -13,7 +12,7 @@ namespace Pitstop.InvoiceService.DataAccess
 
         public DbSet<Renter> Renters { get; set; }
         public DbSet<Invoice> Invoices { get; set; }
-
+        public DbSet<EventStore> Events { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<Renter>().HasKey(m => m.RenterId);
@@ -21,6 +20,9 @@ namespace Pitstop.InvoiceService.DataAccess
 
             builder.Entity<Invoice>().HasKey(m => m.InvoiceId);
             builder.Entity<Invoice>().ToTable("Invoices");
+
+            builder.Entity<EventStore>().ToTable("Events");
+
             base.OnModelCreating(builder);
         }
     }

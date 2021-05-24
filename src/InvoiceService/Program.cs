@@ -41,6 +41,19 @@ namespace Pitstop.InvoiceService
                         return dbContext;
                     });
 
+                    services.AddTransient<InvoiceEventStoreDBContext>((svc) =>
+                    {
+                        var sqlConnectionString = hostContext.Configuration.GetConnectionString("InvoiceEventStoreCN");
+                        var dbContextOptions = new DbContextOptionsBuilder<InvoiceEventStoreDBContext>()
+                            .UseSqlServer(sqlConnectionString)
+                            .Options;
+                        var dbContext = new InvoiceEventStoreDBContext(dbContextOptions);
+
+                        DBInitializer.InitializeEventStore(dbContext);
+
+                        return dbContext;
+                    });
+
                     services.AddTransient<IEmailCommunicator>((svc) =>
                     {
                         var mailConfigSection = hostContext.Configuration.GetSection("Email");

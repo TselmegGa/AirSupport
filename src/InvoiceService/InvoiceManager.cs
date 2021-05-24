@@ -21,12 +21,14 @@ namespace Pitstop.InvoiceService
         private IMessageHandler _messageHandler;
         private IEmailCommunicator _emailCommunicator;
         private InvoiceServiceDBContext _dbContext;
+        private InvoiceEventStoreDBContext _dbContextEventStore;
 
-        public InvoiceManager(IMessageHandler messageHandler, IEmailCommunicator emailCommunicator, InvoiceServiceDBContext dbContext)
+        public InvoiceManager(IMessageHandler messageHandler, IEmailCommunicator emailCommunicator, InvoiceServiceDBContext dbContext, InvoiceEventStoreDBContext dbContextEventStore)
         {
             _messageHandler = messageHandler;
             _emailCommunicator = emailCommunicator;
             _dbContext = dbContext;
+            _dbContextEventStore = dbContextEventStore;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -85,7 +87,28 @@ namespace Pitstop.InvoiceService
                 renterToInsert.RentStarted = DateTime.Now;
 
                 await InsertRenter(renterToInsert);
+                await InsertRentalRegisteredInEventStore(rentalRegistered);
             }
+        }
+
+        private async Task InsertRentalRegisteredInEventStore(RentalRegistered rentalRegistered)
+        {
+            EventStore eventStore = new EventStore();
+            eventStore.Event = "RentalRegistered";
+            Log.Information(rentalRegistered.ToString());
+            eventStore.EventBody = "Id: " + rentalRegistered.Id + ", Name: " + rentalRegistered.Name;
+            eventStore.EventDate = DateTime.Now;
+            await _dbContextEventStore.Events.AddAsync(eventStore);
+            await _dbContextEventStore.SaveChangesAsync();
+        }
+
+        private async Task InsertDayHasPassedInEventStore()
+        {
+            EventStore eventStore = new EventStore();
+            eventStore.Event = "DayHasPassed";
+            eventStore.EventDate = DateTime.Now;
+            await _dbContextEventStore.Events.AddAsync(eventStore);
+            await _dbContextEventStore.SaveChangesAsync();
         }
 
         private async Task HandleAsync()
@@ -94,6 +117,7 @@ namespace Pitstop.InvoiceService
             // ophalen invoices per renter bestaat er geen dan kijken of de datum van nu 1 maand later is dan aangemelde datum
             // anders de laatste invoice pakken en hier kijken of de datum van nu 1 maand later is dan laatse verstuurde datum
 
+            await InsertDayHasPassedInEventStore();
             var renters = _dbContext.Renters.ToList();
             foreach (var renter in renters)
             {
@@ -105,7 +129,7 @@ namespace Pitstop.InvoiceService
                     if (invoices.Last().InvoiceDate.AddMonths(1) >= dateFrom && invoices.Last().InvoiceDate.AddMonths(1) <= dateTo)
                     {
                         var invoice = CreateInvoice(renter);
-                        //await SendInvoice(renter, invoice);
+                        await SendInvoice(renter, invoice);
                         await InsertInvoice(invoice);
                     }
                 }
