@@ -85,7 +85,7 @@ namespace EventManagment
             string logMessage = $"{DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss:ffffff")} - {message}{Environment.NewLine}";
             string logFile = Path.Combine(_logPath, $"{DateTime.Now.ToString("yyyy-MM-dd")}-event_log.txt");
             await File.AppendAllTextAsync(logFile, logMessage);
-            Log.Information("Event: {MessageType} - {Body}", messageType, message);
+            Log.Information("Event: {MessageType} - {Body} in {Url}", messageType, message, logFile);
             return true;
         }
     }
