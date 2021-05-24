@@ -10,7 +10,8 @@ namespace Pitstop.LuggageManagment.Migrations
                 name: "Passenger",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
@@ -28,7 +29,7 @@ namespace Pitstop.LuggageManagment.Migrations
                     Weight = table.Column<int>(type: "int", nullable: false),
                     Brand = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Color = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PassengerId = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    PassengerId = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {

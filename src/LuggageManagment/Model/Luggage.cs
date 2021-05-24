@@ -7,8 +7,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Pitstop.LuggageManagment.Model
 {
     public class Luggage
+
+
     {
-     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public Luggage(){
+
+        }
      [Key]
         public int LuggageId { get; set; }
         [Required]

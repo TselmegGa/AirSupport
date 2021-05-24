@@ -66,8 +66,15 @@ namespace Pitstop.LuggageManagment
                 Log.Information("LuggageDeliveredByPassenger Message");
                         await HandleAsync(messageObject.ToObject<LuggageDeliveredByPassenger>());
                         break;
+
+                         case "RegisterPassenger":
+                Log.Information("RegisterPassengerMessage");
+                        await HandleAsync(messageObject.ToObject<RegisterPassenger>());
+                        break;
                 
                 }
+
+                
                  Log.Information("UnknownMessageType");
             }
             catch (Exception e)
@@ -136,7 +143,7 @@ namespace Pitstop.LuggageManagment
                     //If Passanger isn't known we create a new passenger
                     passenger = new Passenger
                     {
-                        Id = e.passenger.Id,
+                        Id = e.passenger.Id, 
                         FirstName = e.passenger.FirstName,
                         LastName = e.passenger.LastName,
                     };
@@ -154,6 +161,7 @@ namespace Pitstop.LuggageManagment
                 }else{
 
                 Log.Information("Existing Passenger: "+ passenger.FirstName);
+                
                 //When passanger exist we add the Luggage to the existing passenger
                 Log.Information("Amount of luggage allready present: "+ passenger.Luggage.Count);
                 foreach(Luggage luggageFromEvent in e.passenger.Luggage){
@@ -164,6 +172,30 @@ namespace Pitstop.LuggageManagment
                 }
 
                 
+            }
+            catch (DbUpdateException)
+            {
+                Log.Warning("Skipped adding Luggage", e.passenger.Luggage.Count);
+            }
+            return true;
+        }
+    
+      private async Task<bool> HandleAsync(RegisterPassenger e)
+        {
+            Log.Information(e.passenger.FirstName+" registerd");
+
+           try
+            {
+                //Adding the Passenger when a passenger is registered
+                Passenger passenger = new Passenger
+                    {
+                        Id = e.passenger.Id, 
+                        FirstName = e.passenger.FirstName,
+                        LastName = e.passenger.LastName,
+                    };
+                     await _dbContext.Passengers.AddAsync(passenger);
+                     await _dbContext.SaveChangesAsync();
+              
             }
             catch (DbUpdateException)
             {
