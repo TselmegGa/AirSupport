@@ -5,13 +5,13 @@ using Pitstop.LuggageManagment.Model;
 
 namespace Pitstop.LuggageManagment.Events
 {
-    class PassangerToLate : Event
+    class PassengerToLate : Event
     {
-        public List<Passenger> passengers;
+        public readonly List<Passenger> passengers;
 
-        public PassangerToLate(Guid messageId, List<Passenger> passengers) : base(messageId)
+        public PassengerToLate(Guid messageId, List<Passenger> passengers) : base(messageId)
         {
-            Console.WriteLine("PassangerToLateEvent");
+            Console.WriteLine("PassengerToLateEvent");
             this.passengers = passengers;
         }
     }

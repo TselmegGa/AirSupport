@@ -52,9 +52,9 @@ namespace Pitstop.LuggageManagment
 
                 switch (messageType)
                 {
-                    case "PassangerToLate":
+                 case "PassengerToLate":
                     Log.Information("PassengersToLate Message");
-                        await HandleAsync(messageObject.ToObject<PassangerToLate>());
+                        await HandleAsync(messageObject.ToObject<PassengerToLate>());
                         break;
                 
                 case "PlaneArrived":
@@ -67,19 +67,18 @@ namespace Pitstop.LuggageManagment
                         await HandleAsync(messageObject.ToObject<LuggageDeliveredByPassenger>());
                         break;
 
-                         case "RegisterPassenger":
+                case "RegisterPassenger":
                 Log.Information("RegisterPassengerMessage");
                         await HandleAsync(messageObject.ToObject<RegisterPassenger>());
                         break;
 
-                         case "LuggageClaimedByPassenger":
+                case "LuggageClaimedByPassenger":
                 Log.Information("LuggageClaimedByPassenger");
                         await HandleAsync(messageObject.ToObject<LuggageClaimedByPassenger>());
                         break;
                 
                 }
 
-                
                  Log.Information("UnknownMessageType");
             }
             catch (Exception e)
@@ -91,15 +90,49 @@ namespace Pitstop.LuggageManagment
             return true;
         }
 
-        private async Task<bool> HandleAsync(PassangerToLate e)
+        private async Task<bool> HandleAsync(PassengerToLate e)
         {
             Log.Information(e.passengers.Count.ToString());
-            foreach(Passenger passenger in e.passengers){
+            
+            
+
+           //When a passenger is to late the luggage from this passenger has to be removed
+            try{
+                foreach(Passenger passenger in e.passengers){
                 Log.Information(passenger.Id+" - "+passenger.FirstName);
+                // Check if passenger exists in  DB
+                Passenger passengerFromDb = await _dbContext.Passengers.Include(x=> x.Luggage).FirstOrDefaultAsync(c => c.Id == passenger.Id);
+                if (passengerFromDb == null)
+                {
+                    //Not registerd passengers should not be able to add luggage
+                    Log.Information(passenger.Id+" Not found");
+                    //Skipping the removal of luggage of this passenger
+                }else{
+
+                Log.Information("Passenger: "+ passengerFromDb.FirstName);
+                
+                //When passanger exist we add the Luggage to the existing passenger
+                Log.Information("Amount of luggage present: "+ passengerFromDb.Luggage.Count);
+                
+                foreach(Luggage luggageItem in passengerFromDb.Luggage){
+                    //Remove PassengerReference
+                    passengerFromDb.Luggage.Remove(luggageItem);
+                }
+                _dbContext.Passengers.Update(passengerFromDb);
+
+                }
+                await _dbContext.SaveChangesAsync();
+                }
+
+                
             }
-           //TODO
+            catch (DbUpdateException)
+            {
+                Log.Warning("Skipped removing Luggage");
+            }
             return true;
         }
+        
         private async Task<bool> HandleAsync(PlaneArrived e)
         {
             Log.Information(e.plane.Passengers.Count.ToString());
