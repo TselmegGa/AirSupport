@@ -185,6 +185,15 @@ services:
     environment:
       - DOTNET_ENVIRONMENT=Production
 
+  luggagemanagment:
+    image: pitstop/luggagemanagment:1.0
+    build: LuggageManagment
+    container_name: luggagemanagment
+    depends_on:
+      - rabbitmq
+    environment:
+      - DOTNET_ENVIRONMENT=Production
+
   webapp:
     image: pitstop/webapp:1.0
     build: WebApp
