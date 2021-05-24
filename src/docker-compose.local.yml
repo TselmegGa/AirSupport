@@ -5,20 +5,7 @@
 # (this will cause port collisions).
 version: '3'
 services:
-
-  vehiclemanagementapi:
-    ports:
-      - "5000:5000"
-
-  customermanagementapi:
-    ports:
-      - "5100:5100"
-
-  workshopmanagementapi:
-    ports:
-      - "5200:5200"
-      
-
+  
   rentalmanagementapi:
     ports:
       - "5300:5300"
