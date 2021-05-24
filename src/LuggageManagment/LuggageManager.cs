@@ -18,9 +18,10 @@ namespace Pitstop.LuggageManagment
         IMessageHandler _messageHandler;
         LuggageManagmentDBContext _dbContext;
 
-        public LuggageManagment(IMessageHandler messageHandler)
+        public LuggageManagment(IMessageHandler messageHandler,LuggageManagmentDBContext dbContext)
         {
             this._messageHandler = messageHandler;
+            this._dbContext = dbContext;
         }
         public void Start()
         {
