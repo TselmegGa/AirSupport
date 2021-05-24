@@ -62,6 +62,17 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
 
+  rentalmanagementapi:
+      image: pitstop/rentalmanagementapi:1.0
+      build: RentalManagementAPI
+      depends_on:
+        - rabbitmq
+        - sqlserver
+      ports:
+        - "5300:5300"
+      environment:
+        - ASPNETCORE_ENVIRONMENT=Production
+
   workshopmanagementapi:
     image: pitstop/workshopmanagementapi:1.0
     build: WorkshopManagementAPI
@@ -127,6 +138,15 @@ services:
     image: pitstop/customereventhandler:1.0
     build: CustomerEventHandler
     container_name: customereventhandler
+    depends_on:
+      - rabbitmq
+    environment:
+      - DOTNET_ENVIRONMENT=Production
+      
+  rentalmanagement:
+    image: pitstop/rentalmanagement:1.0
+    build: RentalManagement
+    container_name: rentalmanagement
     depends_on:
       - rabbitmq
     environment:
