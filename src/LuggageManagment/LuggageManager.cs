@@ -126,47 +126,29 @@ namespace Pitstop.LuggageManagment
         }
          private async Task<bool> HandleAsync(LuggageDeliveredByPassenger e)
         {
-            Log.Information(e.passenger.FirstName);
-            foreach(Luggage luggage in e.passenger.Luggage){
-                Log.Information(luggage.LuggageId+" - "+luggage.Brand);
-            }
-           try
-            {
-                List<Luggage> luggageList = new List<Luggage>();
-                //Adding the Luggage
-                    
+            Log.Information("LuggageDeliverdBy: "+e.PassengerId.ToString());
 
+           try{
                 // Check if passenger exists in Local DB
-                Passenger passenger = await _dbContext.Passengers.FirstOrDefaultAsync(c => c.Id == e.passenger.Id);
+                Passenger passenger = await _dbContext.Passengers.Include(x=> x.Luggage).FirstOrDefaultAsync(c => c.Id == e.PassengerId);
                 if (passenger == null)
                 {
-                    //If Passanger isn't known we create a new passenger
-                    passenger = new Passenger
-                    {
-                        Id = e.passenger.Id, 
-                        FirstName = e.passenger.FirstName,
-                        LastName = e.passenger.LastName,
-                    };
-                    foreach(Luggage luggageFromEvent in e.passenger.Luggage){
-                        Luggage luggage = new Luggage{
-                            Brand = luggageFromEvent.Brand,
-                            Weight = luggageFromEvent.Weight,
-                            Color = luggageFromEvent.Color
-                        };
-                        luggageList.Add(luggage);
-                    }
-                    passenger.Luggage = luggageList;
-                     await _dbContext.Passengers.AddAsync(passenger);
-                     await _dbContext.SaveChangesAsync();
+                    //Not registerd passengers should not be able to add luggage
+                    Log.Information(e.PassengerId+"Not found");
+                    return false;
                 }else{
 
-                Log.Information("Existing Passenger: "+ passenger.FirstName);
+                Log.Information("Passenger: "+ passenger.FirstName);
                 
                 //When passanger exist we add the Luggage to the existing passenger
                 Log.Information("Amount of luggage allready present: "+ passenger.Luggage.Count);
-                foreach(Luggage luggageFromEvent in e.passenger.Luggage){
-                    passenger.Luggage.Add(luggageFromEvent);
-                }
+                Luggage luggage = new Luggage{
+                    Weight = e.Weight,
+                    Brand = e.Brand,
+                    Color = e.Color
+                };
+                passenger.Luggage.Add(luggage);
+                
                 _dbContext.Passengers.Update(passenger);
                 await _dbContext.SaveChangesAsync();
                 }
@@ -203,6 +185,7 @@ namespace Pitstop.LuggageManagment
             }
             catch (DbUpdateException)
             {
+                //TODO fix duplicate Id's
                 Log.Warning("Skipped adding passenger "+e.LastName, e.Id);
             }
             return true;

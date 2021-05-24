@@ -22,9 +22,10 @@ namespace Pitstop.LuggageManagment.DataAccess
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
-            builder.Entity<Passenger>().HasKey(entity => entity.Id);
+            
             builder.Entity<Passenger>().ToTable("Passenger");
-
+            builder.Entity<Passenger>().Property(e => e.Id).ValueGeneratedNever();
+            
             builder.Entity<Luggage>().HasKey(entity => entity.LuggageId);
             builder.Entity<Luggage>().ToTable("Luggage");
 

@@ -50,9 +50,7 @@ namespace Pitstop.LuggageManagment.Migrations
             modelBuilder.Entity("Pitstop.LuggageManagment.Model.Passenger", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .UseIdentityColumn();
+                        .HasColumnType("int");
 
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");

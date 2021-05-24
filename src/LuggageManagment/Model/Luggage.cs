@@ -10,9 +10,7 @@ namespace Pitstop.LuggageManagment.Model
 
 
     {
-        public Luggage(){
-
-        }
+        
      [Key]
         public int LuggageId { get; set; }
         [Required]
