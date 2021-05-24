@@ -25,12 +25,6 @@ services:
       - MSSQL_PID=Developer
       - SA_PASSWORD=8jkGh47hnDw89Haq8LN2
       
-  mailserver:
-    image: maildev/maildev
-    container_name: mailserver
-    ports:
-      - "25:25"
-      - "4000:80"
 
   logserver:
     image: datalust/seq:latest
@@ -100,7 +94,6 @@ services:
     depends_on:
       - rabbitmq
       - sqlserver
-      - mailserver
     environment:
       - DOTNET_ENVIRONMENT=Production
 
@@ -111,7 +104,6 @@ services:
     depends_on:
       - rabbitmq
       - sqlserver
-      - mailserver
     environment:
       - DOTNET_ENVIRONMENT=Production
 
