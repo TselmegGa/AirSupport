@@ -2,12 +2,13 @@
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-// using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Pitstop.Infrastructure.Messaging;
 using Pitstop.Infrastructure.Messaging.Configuration;
+using Pitstop.LuggageManagment.DataAccess;
 
 using Serilog;
 
@@ -44,7 +45,22 @@ namespace Pitstop.LuggageManagment
                 {
                     services.UseRabbitMQMessageHandler(hostContext.Configuration);
                     
+                    
+                    services.AddTransient<LuggageManagmentDBContext>((svc) =>
+                    {
+                        var sqlConnectionString = hostContext.Configuration.GetConnectionString("LuggageManagmentCN");
+                        var dbContextOptions = new DbContextOptionsBuilder<LuggageManagmentDBContext>()
+                            .UseSqlServer(sqlConnectionString)
+                            .Options;
+                        var dbContext = new LuggageManagmentDBContext(dbContextOptions);
+
+                        DBInitializer.Initialize(dbContext);
+
+                        return dbContext;
+                    });
+
                     services.AddHostedService<LuggageManagment>();
+
                 })
                 .UseSerilog((hostContext, loggerConfiguration) =>
                 {
