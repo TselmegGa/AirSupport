@@ -18,6 +18,6 @@ services:
     ports:
       - "5200:5200"
       
-  # passengermanagementapi:
-  #   ports:
-  #     - "6000:6000"
+  passengermanagementapi:
+    ports:
+      - "6000:6000"

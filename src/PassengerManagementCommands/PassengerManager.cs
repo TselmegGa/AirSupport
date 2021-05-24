@@ -87,14 +87,19 @@ namespace AirSupport.Application.PassengerManagementCommands
         {
             try
             {
-                if (command.isValid())
-                {
+                // if (command.isValid())
+                // {
                     Log.Information("command info:" + command.Id +", "+command.Origin+", "+command.Destination+", ",command.DepartureDate.ToString());
                     Flight flight = command.MapToFlight();
+                    // check to make sure that entities failed transactions still kan be set
+                    if(_dbContext.Flights.Local.Any(e=> e.Id == flight.id)){
+                        _dbContext.Flights.Update(flight);
+                    } else{
                         _dbContext.Flights.Add(flight);
+                    }
                     
                     await _dbContext.SaveChangesAsync();
-                }
+                // }
             }
             catch (DbUpdateException)
             {

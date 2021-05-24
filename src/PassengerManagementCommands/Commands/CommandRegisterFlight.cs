@@ -15,27 +15,27 @@ namespace AirSupport.Application.PassengerManagementCommands.Commands
         public readonly String Origin;
         public readonly String Destination;
         public readonly DateTime DepartureDate;
-        public CommandRegisterFlight(Guid messageId, int id, String origin, String destination, DateTime departureDate) :
+        public CommandRegisterFlight(Guid messageId, int id, String origin, String destination, String departureDate) :
             base(messageId)
         {
             Id = id;
             Origin = origin;
             Destination = destination;
-            DepartureDate = departureDate;
+            DepartureDate = DateTime.Parse(departureDate);
         }
 
-        public bool isValid(){
-            bool isValid = true;
-            if(Id<=0){
-                isValid =false;
-            } else if(Origin.Equals("")){
-                isValid = false;
-            } else if(Destination.Equals("")){
-                isValid = false;
-            } else if(DepartureDate < new DateTime()){
-                isValid = false;
-            }
-            return isValid;
-        }
+        // public bool isValid(){
+        //     bool isValid = true;
+        //     if(Id<=0){
+        //         isValid =false;
+        //     } else if(Origin.Equals("")){
+        //         isValid = false;
+        //     } else if(Destination.Equals("")){
+        //         isValid = false;
+        //     } else if(DepartureDate < new DateTime()){
+        //         isValid = false;
+        //     }
+        //     return isValid;
+        // }
     }
 }

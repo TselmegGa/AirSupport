@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AirSupport.Application.PassengerManagement.Migrations
 {
     [DbContext(typeof(PassengerManagementDBContext))]
-    [Migration("20210520102206_update20mei")]
-    partial class update20mei
+    [Migration("20210524082716_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -24,16 +24,16 @@ namespace AirSupport.Application.PassengerManagement.Migrations
             modelBuilder.Entity("AirSupport.Application.PassengerManagement.Model.Flight", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnType("int");
 
-                    b.Property<DateTime>("ArrivalDate")
+                    b.Property<DateTime?>("ArrivalDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ArrivalGate")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DepartureDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Destination")
                         .IsRequired()
@@ -102,7 +102,7 @@ namespace AirSupport.Application.PassengerManagement.Migrations
             modelBuilder.Entity("AirSupport.Application.PassengerManagement.Model.Passenger", b =>
                 {
                     b.HasOne("AirSupport.Application.PassengerManagement.Model.Flight", "Flight")
-                        .WithMany()
+                        .WithMany("Passengers")
                         .HasForeignKey("FlightId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
