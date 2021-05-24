@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AirSupport.Application.PassengerManagement.DataAccess
 {
@@ -16,10 +17,13 @@ namespace AirSupport.Application.PassengerManagement.DataAccess
         }
 
         public DbSet<Passenger> Passengers { get; set; }
+        public DbSet<Flight> Flights { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<Passenger>().ToTable("Passengers");
+            builder.Entity<Flight>().ToTable("Flights");
+            builder.Entity<Flight>().Property(e => e.Id).ValueGeneratedNever();
             base.OnModelCreating(builder);
         }
 

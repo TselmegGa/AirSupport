@@ -24,7 +24,7 @@ services:
       - ACCEPT_EULA=Y 
       - MSSQL_PID=Developer
       - SA_PASSWORD=8jkGh47hnDw89Haq8LN2
-
+      
   mailserver:
     image: maildev/maildev
     container_name: mailserver
@@ -84,6 +84,28 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
 
+  passengermanagementapi:
+    image: airsupport/passengermanagementapi:1.0
+    build: PassengerManagementAPI
+    depends_on:
+      - rabbitmq
+      - sqlserver
+    ports:
+      - "6000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+
+  passengermanagementcommands:
+    
+    image: airsupport/passengermanagementcommands:1.0
+    build: PassengerManagementCommands
+    depends_on:
+      - rabbitmq
+      - sqlserver
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      
+
   auditlogservice:
     image: pitstop/auditlogservice:1.0
     build: AuditlogService
@@ -92,6 +114,17 @@ services:
       - rabbitmq
     environment:
       - DOTNET_ENVIRONMENT=Production
+
+  invoicemanagementapi:
+    image: pitstop/invoicemanagementapi:1.0
+    build: InvoiceManagementAPI
+    depends_on:
+      - rabbitmq
+      - sqlserver
+    ports:
+      - "5100"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
 
   invoiceservice:
     image: pitstop/invoiceservice:1.0

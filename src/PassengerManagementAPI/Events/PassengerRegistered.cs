@@ -1,4 +1,4 @@
-﻿using AirSupport.Application.PassengerManagement.Commands;
+﻿using AirSupport.Application.PassengerManagement.Model;
 using Pitstop.Infrastructure.Messaging;
 using System;
 using System.Collections.Generic;
@@ -8,22 +8,45 @@ namespace AirSupport.Application.PassengerManagement.Events
 {
     public class PassengerRegistered : Event
     {
-        public readonly int Id;
-        public readonly bool CheckedIn;
+        public readonly String FirstName;
+        public readonly String LastName;
+        public readonly String Email;
+        public readonly DateTime BirthDate;
+        public readonly String PhoneNumber;
+        public readonly String CellNumber;
+        public readonly String Gender;
+        public readonly String Nationality;
 
-        public PassengerRegistered(Guid messageId, int id, bool checkedIn) : 
+        public readonly bool CheckedIn;
+        public readonly int FlightId;
+
+        public PassengerRegistered(Guid messageId, String firstName, String lastName, String email, DateTime birthDate, String phoneNumber, String cellNumber, String gender, String nationality, int flightId) : 
             base(messageId)
         {
-            Id = id;
-            CheckedIn = checkedIn;
+            FirstName = firstName;
+            LastName = lastName;
+            Email = email;
+            BirthDate = birthDate;
+            PhoneNumber = phoneNumber;
+            CellNumber = cellNumber;
+            Gender = gender;
+            CheckedIn = false;
+            Nationality = nationality;
+            FlightId = flightId;
         }
 
-        public static PassengerRegistered FromCommand(RegisterPassenger command)
-        {
+        public static PassengerRegistered FromPassenger(Passenger passenger){
             return new PassengerRegistered(
                 Guid.NewGuid(),
-                command.Id,
-                command.CheckedIn
+                passenger.FirstName,
+                passenger.LastName,
+                passenger.Email,
+                passenger.BirthDate,
+                passenger.PhoneNumber,
+                passenger.CellNumber,
+                passenger.Gender,
+                passenger.Nationality,
+                passenger.FlightId
             );
         }
     }
