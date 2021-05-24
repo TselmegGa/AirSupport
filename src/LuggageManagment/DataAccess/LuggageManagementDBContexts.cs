@@ -5,8 +5,8 @@ namespace Pitstop.LuggageManagment.DataAccess
 {
     public class LuggageManagmentDBContext : DbContext
     {
-        public LuggageManagmentDBContext()
-        { }
+     //   public LuggageManagmentDBContext()
+       // { }
 
         public LuggageManagmentDBContext(DbContextOptions<LuggageManagmentDBContext> options) : base(options)
         { }

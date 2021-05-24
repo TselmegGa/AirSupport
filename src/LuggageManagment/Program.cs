@@ -58,8 +58,8 @@ namespace Pitstop.LuggageManagment
 
                         return dbContext;
                     });
-
                     services.AddHostedService<LuggageManagment>();
+
 
                 })
                 .UseSerilog((hostContext, loggerConfiguration) =>

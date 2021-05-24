@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Pitstop.LuggageManagment
 {
@@ -135,7 +136,7 @@ namespace Pitstop.LuggageManagment
                     }
 
                 // determine passanger
-                Passenger passenger = await _dbContext.Passengers.FirstOrDefaultAsync(c => c.Id == e.passanger.Id);
+                Passenger passenger = await _dbContext.Passengers.FirstOrDefaultAsync(c => c.Id == e.passenger.Id);
                 if (passenger == null)
                 {
                     //If Passanger isn't known we create a new one
@@ -151,8 +152,8 @@ namespace Pitstop.LuggageManagment
                 }
 
                 //When passanger exist we add the Luggage to the existing passenger
-                passenger.Luggage = luggageList;
-                await _dbContext.Passengers.Update(passenger);
+               // passenger.Luggage = luggageList;
+               // await _dbContext.Passengers(passenger);
             
                 await _dbContext.SaveChangesAsync();
             }
