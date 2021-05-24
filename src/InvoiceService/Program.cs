@@ -28,13 +28,13 @@ namespace Pitstop.InvoiceService
                 {
                     services.UseRabbitMQMessageHandler(hostContext.Configuration);
 
-                    services.AddTransient<InvoiceServiceDBContext>((svc) =>
+                    services.AddTransient<InvoiceManagementDBContext>((svc) =>
                     {
-                        var sqlConnectionString = hostContext.Configuration.GetConnectionString("InvoiceServiceEventHandlerCN");
-                        var dbContextOptions = new DbContextOptionsBuilder<InvoiceServiceDBContext>()
+                        var sqlConnectionString = hostContext.Configuration.GetConnectionString("InvoiceManagementCN");
+                        var dbContextOptions = new DbContextOptionsBuilder<InvoiceManagementDBContext>()
                             .UseSqlServer(sqlConnectionString)
                             .Options;
-                        var dbContext = new InvoiceServiceDBContext(dbContextOptions);
+                        var dbContext = new InvoiceManagementDBContext(dbContextOptions);
 
                         DBInitializer.Initialize(dbContext);
 

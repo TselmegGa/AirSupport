@@ -5,24 +5,23 @@ using Pitstop.InvoiceManagementAPI.Repositories;
 namespace Pitstop.Application.CustomerManagementAPI.Controllers
 {
     [Route("/api/[controller]")]
-    public class InvoiceController : Controller
+    public class RenterController : Controller
     {
-
-        IInvoiceRepository _invoiceRepo;
-        public InvoiceController(IInvoiceRepository repo)
+        IRentersRepository _renterRepo;
+        public RenterController(IRentersRepository repo)
         {
-            _invoiceRepo = repo;
+            _renterRepo = repo;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllAsync()
         {
-            var invoices = await _invoiceRepo.GetInvoicesAsync();
-            if (invoices == null)
+            var renters = await _renterRepo.GetRentersAsync();
+            if (renters == null)
             {
                 return NotFound();
             }
-            return Ok(invoices);
+            return Ok(renters);
         }
     }
 }

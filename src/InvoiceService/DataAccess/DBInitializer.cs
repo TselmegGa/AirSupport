@@ -7,7 +7,7 @@ namespace Pitstop.InvoiceService.DataAccess
 {
     public static class DBInitializer
     {
-        public static void Initialize(InvoiceServiceDBContext context)
+        public static void Initialize(InvoiceManagementDBContext context)
         {
             Log.Information("Ensure InvoiceManagement Database");
 

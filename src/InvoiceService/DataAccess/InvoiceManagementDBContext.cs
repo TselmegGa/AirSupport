@@ -3,7 +3,7 @@ using Pitstop.InvoiceService.Model;
 using Polly;
 using System;
 
-namespace Pitstop.InvoiceManagementAPI.DataAccess
+namespace Pitstop.InvoiceService.DataAccess
 {
     public class InvoiceManagementDBContext : DbContext
     {

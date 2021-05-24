@@ -2,14 +2,14 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.EntityFrameworkCore;
 using Pitstop.Infrastructure.Messaging.Configuration;
 using System;
 using Serilog;
 using Microsoft.Extensions.HealthChecks;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Hosting;
-using Pitstop.InvoiceManagementAPI.DataAccess;
+using Pitstop.InvoiceManagementAPI.Repositories;
+using Pitstop.WorkshopManagementAPI.Repositories;
 
 namespace Pitstop.InvoiceManagementAPI
 {
@@ -26,8 +26,10 @@ namespace Pitstop.InvoiceManagementAPI
         public void ConfigureServices(IServiceCollection services)
         {
             // add DBContext
-            var sqlConnectionString = _configuration.GetConnectionString("InvoiceServiceCN");
-            services.AddDbContext<InvoiceManagementDBContext>(options => options.UseSqlServer(sqlConnectionString));
+            var sqlConnectionString = _configuration.GetConnectionString("InvoiceManagementCN");
+            services.AddTransient<IInvoiceManagementRepository>((sp) => new SqlServerInvoiceManagementRepository(sqlConnectionString));
+            services.AddTransient<IInvoiceRepository>((sp) => new SqlServerRefDataRepository(sqlConnectionString));
+            services.AddTransient<IRentersRepository>((sp) => new SqlServerRefDataRepository(sqlConnectionString));
 
             // add messagepublisher
             services.UseRabbitMQMessagePublisher(_configuration);
@@ -40,18 +42,18 @@ namespace Pitstop.InvoiceManagementAPI
             // Register the Swagger generator, defining one or more Swagger documents
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "CustomerManagement API", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "invoiceManagement API", Version = "v1" });
             });
             
             services.AddHealthChecks(checks =>
             {
                 checks.WithDefaultCacheDuration(TimeSpan.FromSeconds(1));
-                checks.AddSqlCheck("InvoiceServiceCN", _configuration.GetConnectionString("InvoiceServiceCN"));
+                checks.AddSqlCheck("InvoiceManagementCN", _configuration.GetConnectionString("InvoiceManagementCN"));
             });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime lifetime, InvoiceManagementDBContext dbContext)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IHostApplicationLifetime lifetime, IInvoiceManagementRepository invoiceManagementRepository)
         {
             Log.Logger = new LoggerConfiguration()
                 .ReadFrom.Configuration(_configuration)
@@ -71,11 +73,7 @@ namespace Pitstop.InvoiceManagementAPI
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "CustomerManagement API - v1");
             });
 
-            // auto migrate db
-            using (var scope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
-            {
-                scope.ServiceProvider.GetService<InvoiceManagementDBContext>().MigrateDB();
-            }
+            invoiceManagementRepository.EnsureDatabase();
         }
     }
 }

@@ -20,10 +20,10 @@ namespace Pitstop.InvoiceService
     {
         private IMessageHandler _messageHandler;
         private IEmailCommunicator _emailCommunicator;
-        private InvoiceServiceDBContext _dbContext;
+        private InvoiceManagementDBContext _dbContext;
         private InvoiceEventStoreDBContext _dbContextEventStore;
 
-        public InvoiceManager(IMessageHandler messageHandler, IEmailCommunicator emailCommunicator, InvoiceServiceDBContext dbContext, InvoiceEventStoreDBContext dbContextEventStore)
+        public InvoiceManager(IMessageHandler messageHandler, IEmailCommunicator emailCommunicator, InvoiceManagementDBContext dbContext, InvoiceEventStoreDBContext dbContextEventStore)
         {
             _messageHandler = messageHandler;
             _emailCommunicator = emailCommunicator;

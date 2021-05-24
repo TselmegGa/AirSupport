@@ -10,8 +10,8 @@ using Pitstop.InvoiceService.DataAccess;
 namespace Pitstop.InvoiceService.Migrations.InvoiceEventStoreDB
 {
     [DbContext(typeof(InvoiceEventStoreDBContext))]
-    [Migration("20210524151624_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20210524160341_InitalCreate")]
+    partial class InitalCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
