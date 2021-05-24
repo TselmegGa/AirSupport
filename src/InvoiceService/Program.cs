@@ -1,10 +1,10 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Pitstop.Infrastructure.Messaging;
 using Pitstop.Infrastructure.Messaging.Configuration;
 using Pitstop.InvoiceService.CommunicationChannels;
-using Pitstop.InvoiceService.Repositories;
+using Pitstop.InvoiceService.DataAccess;
 using Serilog;
 using System;
 using System.IO;
@@ -28,10 +28,30 @@ namespace Pitstop.InvoiceService
                 {
                     services.UseRabbitMQMessageHandler(hostContext.Configuration);
 
-                    services.AddTransient<IInvoiceRepository>((svc) =>
+                    services.AddTransient<InvoiceManagementDBContext>((svc) =>
                     {
-                        var sqlConnectionString = hostContext.Configuration.GetConnectionString("InvoiceServiceCN");
-                        return new SqlServerInvoiceRepository(sqlConnectionString);
+                        var sqlConnectionString = hostContext.Configuration.GetConnectionString("InvoiceManagementCN");
+                        var dbContextOptions = new DbContextOptionsBuilder<InvoiceManagementDBContext>()
+                            .UseSqlServer(sqlConnectionString)
+                            .Options;
+                        var dbContext = new InvoiceManagementDBContext(dbContextOptions);
+
+                        DBInitializer.Initialize(dbContext);
+
+                        return dbContext;
+                    });
+
+                    services.AddTransient<InvoiceEventStoreDBContext>((svc) =>
+                    {
+                        var sqlConnectionString = hostContext.Configuration.GetConnectionString("InvoiceEventStoreCN");
+                        var dbContextOptions = new DbContextOptionsBuilder<InvoiceEventStoreDBContext>()
+                            .UseSqlServer(sqlConnectionString)
+                            .Options;
+                        var dbContext = new InvoiceEventStoreDBContext(dbContextOptions);
+
+                        DBInitializer.InitializeEventStore(dbContext);
+
+                        return dbContext;
                     });
 
                     services.AddTransient<IEmailCommunicator>((svc) =>
