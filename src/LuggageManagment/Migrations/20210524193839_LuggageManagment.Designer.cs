@@ -10,7 +10,7 @@ using Pitstop.LuggageManagment.DataAccess;
 namespace Pitstop.LuggageManagment.Migrations
 {
     [DbContext(typeof(LuggageManagmentDBContext))]
-    [Migration("20210524185835_LuggageManagment")]
+    [Migration("20210524193839_LuggageManagment")]
     partial class LuggageManagment
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -53,6 +53,9 @@ namespace Pitstop.LuggageManagment.Migrations
                 {
                     b.Property<int>("Id")
                         .HasColumnType("int");
+
+                    b.Property<bool>("Arrived")
+                        .HasColumnType("bit");
 
                     b.Property<string>("FirstName")
                         .HasColumnType("nvarchar(max)");

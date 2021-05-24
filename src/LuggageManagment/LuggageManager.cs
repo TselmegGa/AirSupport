@@ -71,6 +71,11 @@ namespace Pitstop.LuggageManagment
                 Log.Information("RegisterPassengerMessage");
                         await HandleAsync(messageObject.ToObject<RegisterPassenger>());
                         break;
+
+                         case "LuggageClaimedByPassenger":
+                Log.Information("LuggageClaimedByPassenger");
+                        await HandleAsync(messageObject.ToObject<LuggageClaimedByPassenger>());
+                        break;
                 
                 }
 
@@ -92,36 +97,20 @@ namespace Pitstop.LuggageManagment
             foreach(Passenger passenger in e.passengers){
                 Log.Information(passenger.Id+" - "+passenger.FirstName);
             }
-            // voorbeeld van aan db toevoegen zie EventHandler van WorkshopManagementEventHandler voor meer informatie
-            // try{
-            //      await _dbContext.Customers.AddAsync(new Customer
-            //     {
-            //         CustomerId = e.id,
-            //         Name = e.Name
-            //     });
-            //     await _dbContext.SaveChangesAsync();
-            // } catch(DbUpdateException){
-            //     Log.Warning("Skipped adding customer with customer id {CustomerId}.", e.CustomerId);
-            // }
+           //TODO
             return true;
         }
         private async Task<bool> HandleAsync(PlaneArrived e)
         {
             Log.Information(e.plane.Passengers.Count.ToString());
              foreach(Passenger passenger in e.plane.Passengers){
-                Log.Information(passenger.Id+" - "+passenger.FirstName);
+                Log.Information(passenger.Id+" - "+passenger.FirstName+" has arrived!");
+                Passenger passengerFromDB = await _dbContext.Passengers.FirstOrDefaultAsync(c => c.Id == passenger.Id);
+                passengerFromDB.Arrived=true;
             }
-            // voorbeeld van aan db toevoegen zie EventHandler van WorkshopManagementEventHandler voor meer informatie
-            // try{
-            //      await _dbContext.Customers.AddAsync(new Customer
-            //     {
-            //         CustomerId = e.id,
-            //         Name = e.Name
-            //     });
-            //     await _dbContext.SaveChangesAsync();
-            // } catch(DbUpdateException){
-            //     Log.Warning("Skipped adding customer with customer id {CustomerId}.", e.CustomerId);
-            // }
+            await _dbContext.SaveChangesAsync();
+            
+            
             return true;
         }
          private async Task<bool> HandleAsync(LuggageDeliveredByPassenger e)
@@ -161,6 +150,37 @@ namespace Pitstop.LuggageManagment
             }
             return true;
         }
+        private async Task<bool> HandleAsync(LuggageClaimedByPassenger e)
+        {
+            Log.Information("LuggageItemClaimed: "+e.LuggageId.ToString());
+            //TODO Implement check to see if passenger actually arrived
+           try{
+                // Check if Luggage exist in DB
+                Luggage luggage = await _dbContext.Luggage.FirstOrDefaultAsync(c => c.LuggageId == e.LuggageId);
+                if (luggage == null)
+                {
+                    //Luggage not registerd
+                    Log.Information(e.LuggageId+" Not found");
+                    return false;
+                }else{
+                    Log.Information("LuggageIdFound: "+ luggage.LuggageId);
+              
+                //Remove Luggage, as passenger has retrieved it
+                 _dbContext.Luggage.Remove(luggage);
+
+    
+              
+                await _dbContext.SaveChangesAsync();
+                }
+
+                
+            }
+            catch (DbUpdateException)
+            {
+                Log.Warning("Skipped adding Luggage");
+            }
+            return true;
+        }
     
       private async Task<bool> HandleAsync(RegisterPassenger e)
         {
@@ -173,7 +193,8 @@ namespace Pitstop.LuggageManagment
                     {
                         Id = e.Id, 
                         FirstName = e.FirstName,
-                        LastName = e.LastName
+                        LastName = e.LastName,
+                        Arrived = false
                     };
                     Log.Information("AttempingtoAdd", e.Id);
                     await _dbContext.Passengers.AddAsync(passenger);

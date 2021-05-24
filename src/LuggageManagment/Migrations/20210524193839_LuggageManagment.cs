@@ -12,7 +12,8 @@ namespace Pitstop.LuggageManagment.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Arrived = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {

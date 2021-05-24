@@ -12,8 +12,9 @@ namespace Pitstop.LuggageManagment.Model
         public int Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-
+        public bool Arrived {get; set;} 
        
         public virtual ICollection<Luggage> Luggage {get;set;}
     }
 }
+
