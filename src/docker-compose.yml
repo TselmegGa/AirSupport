@@ -73,6 +73,28 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
 
+  passengermanagementapi:
+    image: airsupport/passengermanagementapi:1.0
+    build: PassengerManagementAPI
+    depends_on:
+      - rabbitmq
+      - sqlserver
+    ports:
+      - "6000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+
+  passengermanagementcommands:
+    
+    image: airsupport/passengermanagementcommands:1.0
+    build: PassengerManagementCommands
+    depends_on:
+      - rabbitmq
+      - sqlserver
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      
+
   auditlogservice:
     image: pitstop/auditlogservice:1.0
     build: AuditlogService

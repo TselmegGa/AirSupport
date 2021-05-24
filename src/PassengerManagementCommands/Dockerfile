@@ -13,10 +13,6 @@ RUN dotnet publish -c Release -o out
 FROM mcr.microsoft.com/dotnet/aspnet:5.0
 COPY --from=build-env /app/out .
 
-# Expose ports
-EXPOSE 5000/tcp
-ENV ASPNETCORE_URLS http://*:6000
-HEALTHCHECK --interval=30s --timeout=3s --retries=1 CMD curl --silent --fail http://localhost:6000/hc || exit 1
-
 # Start
-ENTRYPOINT ["dotnet", "AirSupport.PassengerManagementAPI.dll"]
+ENTRYPOINT ["dotnet", "AirSupport.PassengerManagementCommands.dll"]
+

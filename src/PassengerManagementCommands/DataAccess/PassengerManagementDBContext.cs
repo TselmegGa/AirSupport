@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using AirSupport.Application.PassengerManagement.Model;
+using AirSupport.Application.PassengerManagementCommands.Model;
+using System.ComponentModel.DataAnnotations.Schema;
 using Polly;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace AirSupport.Application.PassengerManagement.DataAccess
+namespace AirSupport.Application.PassengerManagementCommands.DataAccess
 {
     public class PassengerManagementDBContext : DbContext
     {

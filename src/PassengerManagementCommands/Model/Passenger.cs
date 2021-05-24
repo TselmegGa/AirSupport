@@ -6,18 +6,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AirSupport.Application.PassengerManagement.Model
+namespace AirSupport.Application.PassengerManagementCommands.Model
 {
     public class Passenger
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         [Required]
-        [MinLength(1)]
         public String FirstName { get; set; }
         [Required]
-
-        [MinLength(1)]
         public String LastName { get; set; }
         [Required]
         [EmailAddress]
@@ -37,8 +35,8 @@ namespace AirSupport.Application.PassengerManagement.Model
 
         [Required]
         public int FlightId { get; set; }
-        [ForeignKey("FlightId")]
-        public virtual Flight Flight { get; set; }
+        // [ForeignKey("FlightId")]
+        // public virtual Flight Flight { get; set; }
 
         [NotMapped]
         public string FullName

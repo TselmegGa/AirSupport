@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore;
 using Serilog;
 
-namespace AirSupport.Application.PassengerManagement
+namespace AirSupport.Application.PassengerManagementCommands
 {
     public class Program
     {
